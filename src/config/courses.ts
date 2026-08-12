@@ -1,0 +1,142 @@
+import type { Course, CourseId } from "../types";
+
+// Descrições, faixas etárias e conteúdos programáticos seguem fielmente o
+// posicionamento pedagógico oficial de cada curso da TECHERS.
+// Para alterar textos, cargas horárias ou faixas etárias, edite apenas este arquivo.
+
+export const courses: Record<CourseId, Course> = {
+  programacao: {
+    id: "programacao",
+    name: "Programação",
+    shortLabel: "Programação",
+    icon: "🕹️",
+    tagline: "Pensamento computacional criando projetos reais",
+    description:
+      "O curso para crianças e adolescentes desenvolverem o Pensamento Computacional criando projetos reais. Os alunos aprendem desenvolvendo jogos 2D e 3D, aplicativos, websites, modelagem 3D e aplicações com Inteligência Artificial.",
+    whatYouBuild: ["Jogos 2D e 3D", "Aplicativos", "Websites", "Modelagem 3D", "Projetos com Inteligência Artificial"],
+    whatYouLearn: [
+      "Programação em blocos (Scratch e App Inventor)",
+      "Programação em código (Python, JavaScript, Lua, GML e C#)",
+      "Desenvolvimento Front-End e Back-End",
+      "Banco de dados, UX/UI e gestão de projetos",
+      "Inteligência Artificial aplicada",
+    ],
+    skills: ["Pensamento computacional", "Raciocínio lógico", "Criatividade", "Resolução de problemas", "Autonomia", "Trabalho em equipe"],
+    ageRange: { min: 8, max: 17 },
+    schedule: "1 vez por semana, 2 horas",
+    duration: "Curso sequencial e contínuo",
+    category: "principal",
+    accent: "#6d28d9",
+  },
+  robotica: {
+    id: "robotica",
+    name: "Robótica",
+    shortLabel: "Robótica",
+    icon: "🤖",
+    tagline: "Construir, programar e dar vida às próprias ideias",
+    description:
+      "O curso ideal para quem gosta de construir, programar e dar vida às próprias ideias por meio da tecnologia, com robôs, protótipos, Arduino, impressão 3D e Internet das Coisas.",
+    whatYouBuild: ["Robôs e protótipos inteligentes", "Projetos com LEGO e Arduino", "Sistemas automatizados", "Modelos em impressão 3D", "Soluções com IoT"],
+    whatYouLearn: [
+      "Fundamentos de engenharia mecânica, elétrica e mecatrônica",
+      "Programação em blocos e em código",
+      "Eletrônica aplicada, Arduino e IoT",
+      "Impressão e modelagem 3D",
+      "Desenvolvimento de projetos para desafios reais",
+    ],
+    skills: ["Pensamento computacional", "Criatividade científica", "Resolução de problemas", "Trabalho em equipe", "Autonomia e protagonismo"],
+    ageRange: { min: 8, max: 17 },
+    schedule: "1 vez por semana, 2 horas",
+    duration: "Duração mínima de 2 anos",
+    category: "principal",
+    accent: "#0f9d78",
+  },
+  maker: {
+    id: "maker",
+    name: "Maker",
+    shortLabel: "Maker",
+    icon: "⚙️",
+    tagline: "Descobrindo tecnologia construindo, experimentando e criando",
+    description:
+      "O curso ideal para as crianças descobrirem o universo da tecnologia de forma divertida, criativa e prática, construindo com LEGO, Arduino, impressão 3D e primeiros desafios de programação em blocos.",
+    whatYouBuild: ["Construções com LEGO", "Projetos criativos com Arduino", "Atividades manuais de montagem", "Primeiros desafios de programação em blocos", "Experiências com impressão 3D"],
+    whatYouLearn: ["Noções iniciais de engenharia e robótica", "Lógica e pensamento computacional", "Programação em blocos", "Construção e funcionamento de mecanismos"],
+    skills: ["Coordenação motora fina", "Criatividade e imaginação", "Raciocínio lógico", "Concentração", "Autonomia e confiança"],
+    ageRange: { min: 5, max: 7 },
+    schedule: "1 vez por semana, 2 horas",
+    duration: "1 a 2 anos, dividido em níveis Inicial e Avançado",
+    category: "principal",
+    accent: "#c2790a",
+  },
+  "informatica-moderna": {
+    id: "informatica-moderna",
+    name: "Informática Moderna",
+    shortLabel: "Informática Moderna",
+    icon: "💻",
+    tagline: "Usar o computador de forma inteligente, criativa e produtiva",
+    description:
+      "O curso para quem deseja utilizar o computador de forma inteligente, criativa e produtiva, desenvolvendo habilidades essenciais para a escola, o dia a dia e o futuro profissional.",
+    whatYouBuild: ["Documentos, planilhas e apresentações", "Artes e apresentações no Canva", "Edição de imagens e vídeos", "Projetos com uso responsável de IA"],
+    whatYouLearn: [
+      "Word, Excel e PowerPoint",
+      "Ferramentas do Google para organização e colaboração",
+      "Canva para criação de artes",
+      "Uso prático e responsável da Inteligência Artificial",
+      "Organização de arquivos e produtividade",
+    ],
+    skills: ["Autonomia no uso da tecnologia", "Criatividade e comunicação digital", "Organização e produtividade", "Uso seguro e responsável da tecnologia"],
+    ageRange: { min: 8, max: null },
+    schedule: "1 vez por semana, 1 hora",
+    duration: "Níveis Inicial, Intermediário e Avançado",
+    category: "complementar",
+    accent: "#3b6dc2",
+  },
+  "animacao-digital": {
+    id: "animacao-digital",
+    name: "Animação Digital",
+    shortLabel: "Animação Digital",
+    icon: "🎬",
+    tagline: "Criando histórias em movimento",
+    description:
+      "O curso ideal para quem gosta de desenhar, criar personagens e transformar ideias em animações, dos 12 princípios da animação até a introdução à animação 3D.",
+    whatYouBuild: ["Personagens originais", "Histórias e roteiros", "Curtas-metragens animados", "Dublagem e edição de áudio", "Animações 2D e introdução ao 3D"],
+    whatYouLearn: [
+      "Técnicas de desenho aplicadas à animação",
+      "Os 12 princípios da animação",
+      "OpenToonz para animação 2D",
+      "Audacity para edição de áudio e dublagem",
+      "Blender para modelagem e animação 3D",
+    ],
+    skills: ["Criatividade e expressão artística", "Storytelling", "Planejamento de projetos", "Atenção aos detalhes", "Comunicação visual"],
+    ageRange: { min: 12, max: 17 },
+    schedule: "1 vez por semana, 2 horas",
+    duration: "Duração mínima de 2 anos",
+    category: "principal",
+    accent: "#c23b5c",
+  },
+  "design-grafico": {
+    id: "design-grafico",
+    name: "Design Gráfico",
+    shortLabel: "Design Gráfico",
+    icon: "🎨",
+    tagline: "Transformando criatividade em comunicação visual",
+    description:
+      "O curso ideal para quem gosta de criar, comunicar ideias e desenvolver projetos visuais que chamam a atenção, formando um portfólio real ao longo do curso.",
+    whatYouBuild: ["Artes para redes sociais", "Identidades visuais e logotipos", "Banners, cartazes e materiais gráficos", "Apresentações profissionais", "Portfólio pessoal"],
+    whatYouLearn: [
+      "Fundamentos e princípios do design gráfico",
+      "Teoria das cores, tipografia e composição",
+      "Affinity e Canva",
+      "Edição e tratamento de imagens",
+      "Inteligência Artificial como apoio criativo",
+    ],
+    skills: ["Criatividade e pensamento visual", "Senso estético", "Comunicação e resolução de problemas", "Organização de projetos"],
+    ageRange: { min: 12, max: 17 },
+    schedule: "1 vez por semana, 2 horas",
+    duration: "Duração mínima de 2 anos",
+    category: "principal",
+    accent: "#8b5cf6",
+  },
+};
+
+export const courseList = Object.values(courses);

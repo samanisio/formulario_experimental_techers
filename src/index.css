@@ -1,0 +1,58 @@
+@import "tailwindcss";
+
+@theme {
+  --font-display: "Space Grotesk", ui-sans-serif, system-ui, sans-serif;
+  --font-body: "Inter", ui-sans-serif, system-ui, sans-serif;
+  --font-mono: "JetBrains Mono", ui-monospace, monospace;
+
+  --color-ink: #14111c;
+  --color-paper: #faf9f7;
+  --color-paper-dim: #f1eef2;
+  --color-line: #e4dfe6;
+  --color-violet: #6d28d9;
+  --color-violet-light: #8b5cf6;
+  --color-violet-soft: #efe9fb;
+  --color-mint: #0f9d78;
+  --color-amber: #c2790a;
+  --color-rose: #c23b5c;
+  --color-slate: #6b6674;
+}
+
+@layer base {
+  html {
+    background: var(--color-paper);
+    color-scheme: light;
+  }
+  body {
+    font-family: var(--font-body);
+    background: var(--color-paper);
+    color: var(--color-ink);
+    -webkit-font-smoothing: antialiased;
+  }
+  ::selection {
+    background: var(--color-violet-soft);
+    color: var(--color-violet);
+  }
+  :focus-visible {
+    outline: 2px solid var(--color-violet-light);
+    outline-offset: 2px;
+    border-radius: 2px;
+  }
+}
+
+@layer utilities {
+  .font-display {
+    font-family: var(--font-display);
+  }
+  .font-mono {
+    font-family: var(--font-mono);
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  *, *::before, *::after {
+    animation-duration: 0.001ms !important;
+    animation-iteration-count: 1 !important;
+    transition-duration: 0.001ms !important;
+  }
+}
