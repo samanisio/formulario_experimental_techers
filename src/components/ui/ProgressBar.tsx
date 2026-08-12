@@ -8,15 +8,16 @@ interface ProgressBarProps {
 
 /**
  * Avança um passo por tela, de forma linear e previsível — sem "prender"
- * a barra num mesmo percentual por várias telas seguidas.
+ * a barra num mesmo percentual por várias telas seguidas. Mostra apenas o
+ * rótulo (ex.: "Pergunta 1 de 10"), sem porcentagem — a barra visual já
+ * comunica o progresso.
  */
 export function ProgressBar({ current, total, label }: ProgressBarProps) {
   const pct = Math.round((current / total) * 100);
   return (
     <div className="w-full">
-      <div className="flex items-baseline justify-between mb-2">
+      <div className="mb-2">
         <span className="font-mono text-xs tracking-widest text-slate uppercase">{label}</span>
-        <span className="font-mono text-xs text-violet">{pct}%</span>
       </div>
       <div className="h-1.5 w-full rounded-full bg-paper-dim overflow-hidden">
         <div
