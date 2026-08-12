@@ -3,6 +3,7 @@ import { ResultHero } from "../components/results/ResultHero";
 import { RankingList } from "../components/results/RankingList";
 import { ComplementaryCard } from "../components/results/ComplementaryCard";
 import { FuturePaths } from "../components/results/FuturePaths";
+import { DownloadResultButton } from "../components/results/DownloadResultButton";
 import { Button } from "../components/ui/Button";
 import type { RecommendationResult } from "../types";
 
@@ -35,6 +36,8 @@ export function ResultsPage({ studentName, studentAge, result, onRestart }: Resu
         hybridCourses={result.hybridCourses}
         synthesis={synthesis}
       />
+
+      <DownloadResultButton studentName={studentName} studentAge={studentAge} synthesis={synthesis} result={result} />
 
       <RankingList statuses={result.statusByCourse} />
 

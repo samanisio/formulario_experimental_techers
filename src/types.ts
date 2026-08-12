@@ -74,7 +74,6 @@ export interface AnswerOption {
 
 export interface ProfileQuestion {
   id: string;
-  step: number; // etapa do formulário (1-5), perguntas de perfil ficam em 2-5
   title: string;
   helper?: string;
   options: AnswerOption[];

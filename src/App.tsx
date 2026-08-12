@@ -12,8 +12,6 @@ import type { Answers, IntakeData } from "./types";
 
 type Phase = "intake" | "question" | "results";
 
-const TOTAL_STAGES = 5;
-
 function App() {
   const [phase, setPhase] = useState<Phase>("intake");
   const [questionIndex, setQuestionIndex] = useState(0);
@@ -72,6 +70,12 @@ function App() {
 
   const canContinue = phase === "question" ? Boolean(answers[currentQuestion.id]) : true;
 
+  // Fluxo linear: 1 tela de identificação + N perguntas. A barra avança um
+  // passo por tela, sem ficar parada no mesmo percentual por várias telas.
+  const totalScreens = questions.length + 1;
+  const currentScreen = phase === "intake" ? 1 : 1 + questionIndex + 1;
+  const progressLabel = phase === "intake" ? "Sobre você" : `Pergunta ${questionIndex + 1} de ${questions.length}`;
+
   return (
     <div className="min-h-screen bg-paper">
       <header className="border-b border-line">
@@ -84,10 +88,7 @@ function App() {
       <main className="mx-auto max-w-xl px-5 py-8 sm:py-12">
         {phase !== "results" && (
           <div className="mb-8">
-            <ProgressBar
-              step={phase === "intake" ? 1 : currentQuestion.step}
-              totalSteps={TOTAL_STAGES}
-            />
+            <ProgressBar current={currentScreen} total={totalScreens} label={progressLabel} />
           </div>
         )}
 

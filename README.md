@@ -48,7 +48,10 @@ Dimensões de perfil (StudentProfile, ~27 dimensões internas)
    ↓
 Pesos da resposta (cada alternativa soma pontos a 1+ dimensões)
    ↓
-Pontuação de cada curso (produto escalar perfil × matriz de pesos do curso)
+Distintividade por dimensão (dimensões raras entre os cursos pesam mais —
+                              ver nota abaixo)
+   ↓
+Pontuação de cada curso (produto escalar perfil × pesos efetivos do curso)
    ↓
 Normalização (0–100%, usando o máximo REALMENTE alcançável para aquele curso —
                ver nota abaixo)
@@ -67,18 +70,49 @@ que mais favorece aquele curso especificamente, e os valores são somados. Esse 
 é sempre alcançável por algum conjunto real de respostas, o que permite que perfis
 muito alinhados cheguem a 90%+ de afinidade, como nos exemplos da especificação.
 
+**Nota sobre distintividade por dimensão (`src/engine/scoringEngine.ts`):**
+dimensões que aparecem em quase todos os cursos (como "criatividade" ou
+"raciocínio lógico") diferenciam pouco um curso do outro. Dimensões raras
+(como "eletrônica", quase exclusiva de Robótica, ou "estética visual", quase
+exclusiva de Design Gráfico) são muito mais informativas para decidir *entre*
+cursos parecidos. Por isso, antes de pontuar, cada peso da matriz de cursos é
+multiplicado por um fator de distintividade — uma versão simplificada de
+IDF ("inverse document frequency", técnica clássica de sistemas de busca e
+recomendação): dimensões usadas por todos os 6 cursos ficam com fator ~1
+(neutro); dimensões usadas por 1 único curso chegam a ~2.3x. Isso resolve o
+problema de Programação e Robótica (ou Animação Digital e Design Gráfico)
+ficarem com pontuações quase idênticas para perfis mistos — o fator amplifica
+justamente o que torna cada curso único.
+
 Informática Moderna é sempre calculada **separadamente**, com sua própria matriz de
 pesos, e nunca compete com os cursos principais no ranking — ela aparece como
 indicação de complemento (alta / moderada / baixa, conforme faixas de pontuação em
 `src/config/scoring.ts`).
 
+## Imagem de resultado para download
+
+Na tela de resultado, o botão **"Baixar resultado em imagem"** gera uma imagem PNG
+(`src/engine/resultImage.ts`) inteiramente no navegador, via Canvas 2D — sem
+nenhum serviço externo ou upload de dados. A imagem inclui nome completo e idade do
+aluno, a síntese do perfil, o curso principal com o percentual de afinidade, o
+ranking completo e o curso complementar (quando houver). O nome do arquivo é
+gerado a partir do nome do aluno (ex.: `techers-perfil-maria-santos.png`).
+
 ## Como alterar perguntas
 
-Edite `src/config/questions.ts`. Cada pergunta tem um `id`, uma `title`, um `step`
-(1 a 5, define em qual etapa do formulário ela aparece) e uma lista de `options`,
-cada uma com um `label` e um objeto `weights` (dimensão → peso). Basta adicionar,
-remover ou reescrever perguntas — o motor de recomendação se adapta automaticamente
-(inclusive o cálculo do máximo alcançável por curso).
+Edite `src/config/questions.ts`. Cada pergunta tem um `id`, uma `title` e uma lista
+de `options`, cada uma com um `label` e um objeto `weights` (dimensão → peso). Basta
+adicionar, remover ou reescrever perguntas — o motor de recomendação e a barra de
+progresso se adaptam automaticamente ao número de perguntas (inclusive o cálculo do
+máximo alcançável por curso). Atualmente são 10 perguntas, escritas para não exigir
+nenhum conhecimento prévio de programação, tecnologia ou dos cursos da TECHERS —
+todas partem de situações do dia a dia (um quebra-cabeça, uma tarefa de escola, um
+aparelho novo) em vez de vocabulário técnico.
+
+A barra de progresso é linear: 1 tela de identificação + N perguntas = N+1 telas, e
+cada tela avança exatamente 1/(N+1) do total. Isso evita o problema da versão
+anterior, em que várias perguntas ficavam agrupadas sob a mesma "etapa" e a barra
+parecia travada por várias telas seguidas.
 
 ## Como alterar pesos
 
@@ -118,9 +152,11 @@ em `accent`, no respectivo curso, em `src/config/courses.ts`.
 
 ## Como adicionar novas perguntas
 
-1. Adicione um novo objeto em `src/config/questions.ts`, com `id` único, `step` (1–5)
-   e ao menos 3–5 `options`, cada uma com `weights` para as dimensões que ela deve
-   influenciar (ver lista completa de dimensões em `src/types.ts`).
+1. Adicione um novo objeto em `src/config/questions.ts`, com `id` único e ao menos
+   3–5 `options`, cada uma com `weights` para as dimensões que ela deve influenciar
+   (ver lista completa de dimensões em `src/types.ts`). Prefira sempre situações do
+   dia a dia a vocabulário técnico — o aluno pode nunca ter visto programação,
+   robótica ou qualquer um dos cursos antes.
 2. Rode `npm test` para conferir se os perfis de exemplo continuam batendo com o
    curso esperado.
 3. Não é necessário alterar nenhum outro arquivo — o formulário, a barra de
