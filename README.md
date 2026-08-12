@@ -94,9 +94,21 @@ indicação de complemento (alta / moderada / baixa, conforme faixas de pontuaç
 Na tela de resultado, o botão **"Baixar resultado em imagem"** gera uma imagem PNG
 (`src/engine/resultImage.ts`) inteiramente no navegador, via Canvas 2D — sem
 nenhum serviço externo ou upload de dados. A imagem inclui nome completo e idade do
-aluno, a síntese do perfil, o curso principal com o percentual de afinidade, o
-ranking completo e o curso complementar (quando houver). O nome do arquivo é
-gerado a partir do nome do aluno (ex.: `techers-perfil-maria-santos.png`).
+aluno, a síntese do perfil, o curso principal com sua posição no ranking (medalha 🥇
+para o 1º lugar), a ordem de afinidade completa e o curso complementar (quando
+houver). O nome do arquivo é gerado a partir do nome do aluno (ex.:
+`techers-perfil-maria-santos.png`).
+
+## Exibição de resultado: ordem, não porcentagem
+
+A interface e a imagem baixada nunca mostram o percentual de afinidade — apenas a
+**ordem** entre os cursos (🥇🥈🥉 para os três primeiros, "4º", "5º" para os
+demais), evitando a falsa precisão de um número (a diferença entre 81% e 79% não é
+significativa, mas "1º" e "2º" comunicam a mesma informação sem parecer uma nota
+exata). Internamente, o motor de recomendação continua calculando a pontuação
+0–100 normalmente — ela só não é exibida — e continua sendo usada para decidir
+elegibilidade, perfil híbrido e trajetórias futuras (ver `src/types.ts` >
+`CourseAffinity.score`).
 
 ## Como alterar perguntas
 

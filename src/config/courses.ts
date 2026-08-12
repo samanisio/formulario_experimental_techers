@@ -9,7 +9,7 @@ export const courses: Record<CourseId, Course> = {
     id: "programacao",
     name: "Programação",
     shortLabel: "Programação",
-    icon: "🕹️",
+    icon: "🎮",
     tagline: "Pensamento computacional criando projetos reais",
     description:
       "O curso para crianças e adolescentes desenvolverem o Pensamento Computacional criando projetos reais. Os alunos aprendem desenvolvendo jogos 2D e 3D, aplicativos, websites, modelagem 3D e aplicações com Inteligência Artificial.",
@@ -55,7 +55,7 @@ export const courses: Record<CourseId, Course> = {
     id: "maker",
     name: "Maker",
     shortLabel: "Maker",
-    icon: "⚙️",
+    icon: "🔧",
     tagline: "Descobrindo tecnologia construindo, experimentando e criando",
     description:
       "O curso ideal para as crianças descobrirem o universo da tecnologia de forma divertida, criativa e prática, construindo com LEGO, Arduino, impressão 3D e primeiros desafios de programação em blocos.",

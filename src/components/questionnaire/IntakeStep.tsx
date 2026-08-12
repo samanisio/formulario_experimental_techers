@@ -77,7 +77,7 @@ function Field({ label, error, children }: { label: string; error?: string; chil
 }
 
 function inputClass(hasError: boolean) {
-  return `w-full rounded-xl border px-4 py-3 text-ink bg-paper placeholder:text-slate/60 outline-none transition-colors focus:border-violet ${
+  return `w-full rounded-xl border px-4 py-3 text-ink bg-paper placeholder:text-slate/60 outline-none transition-all focus:border-violet focus:shadow-[0_0_0_4px_rgba(109,40,217,0.1)] ${
     hasError ? "border-rose" : "border-line"
   }`;
 }

@@ -20,7 +20,7 @@ export function Logo() {
         />
       )}
       <span className="font-display font-bold text-lg tracking-tight text-ink leading-none">
-        TECH<span className="text-violet">ERS</span>
+        TECHERS
       </span>
     </div>
   );

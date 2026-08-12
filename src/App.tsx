@@ -77,15 +77,20 @@ function App() {
   const progressLabel = phase === "intake" ? "Sobre você" : `Pergunta ${questionIndex + 1} de ${questions.length}`;
 
   return (
-    <div className="min-h-screen bg-paper">
-      <header className="border-b border-line">
+    <div className="min-h-screen bg-paper relative">
+      <div
+        className="pointer-events-none fixed inset-x-0 top-0 h-[420px] opacity-[0.07]"
+        style={{ background: "radial-gradient(ellipse 640px 320px at 50% -80px, var(--color-violet-light), transparent 70%)" }}
+        aria-hidden="true"
+      />
+      <header className="border-b border-line relative">
         <div className="mx-auto max-w-xl px-5 py-4 flex items-center justify-between">
           <Logo />
           {phase !== "results" && <span className="font-mono text-[11px] text-slate uppercase tracking-widest">Diagnóstico de perfil</span>}
         </div>
       </header>
 
-      <main className="mx-auto max-w-xl px-5 py-8 sm:py-12">
+      <main className="mx-auto max-w-xl px-5 py-8 sm:py-12 relative">
         {phase !== "results" && (
           <div className="mb-8">
             <ProgressBar current={currentScreen} total={totalScreens} label={progressLabel} />

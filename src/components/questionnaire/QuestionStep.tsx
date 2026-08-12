@@ -24,8 +24,8 @@ export function QuestionStep({ question, selected, onSelect }: QuestionStepProps
               onClick={() => onSelect(option.id)}
               className={`group flex items-center gap-4 text-left rounded-2xl border px-4 py-4 transition-all duration-150 ${
                 isSelected
-                  ? "border-violet bg-violet-soft"
-                  : "border-line bg-paper hover:border-ink/30 hover:bg-paper-dim"
+                  ? "border-violet bg-violet-soft shadow-[0_2px_10px_rgba(109,40,217,0.12)]"
+                  : "border-line bg-paper hover:border-ink/25 hover:bg-paper-dim hover:shadow-[0_2px_8px_rgba(20,17,28,0.05)] hover:-translate-y-0.5"
               }`}
             >
               <span

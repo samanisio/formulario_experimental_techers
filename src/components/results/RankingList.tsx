@@ -13,34 +13,35 @@ const statusTone: Record<CourseStatus["status"], string> = {
   "fora-da-faixa": "text-slate",
 };
 
+const medals = ["🥇", "🥈", "🥉"];
+
 export function RankingList({ statuses }: { statuses: CourseStatus[] }) {
   const sorted = [...statuses].sort((a, b) => b.affinity - a.affinity);
   return (
     <div>
-      <h3 className="font-display text-lg font-semibold text-ink mb-3">📊 Ranking de afinidade</h3>
-      <div className="space-y-2">
+      <h3 className="font-display text-lg font-semibold text-ink mb-3">📊 Ordem de afinidade</h3>
+      <div className="space-y-2.5">
         {sorted.map((s, i) => {
           const course = courses[s.courseId];
+          const rankMark = medals[i] ?? `${i + 1}º`;
           return (
-            <div key={s.courseId} className="flex items-center gap-4 rounded-2xl border border-line bg-paper px-4 py-3.5">
-              <span className="font-mono text-xs text-slate w-5 shrink-0">{i + 1}º</span>
-              <span className="text-xl shrink-0">{course.icon}</span>
+            <div
+              key={s.courseId}
+              className="flex items-center gap-4 rounded-2xl bg-paper px-4 py-3.5 shadow-[0_1px_2px_rgba(20,17,28,0.04)]"
+              style={{ borderLeft: `4px solid ${course.accent}`, borderTop: "1px solid var(--color-line)", borderRight: "1px solid var(--color-line)", borderBottom: "1px solid var(--color-line)" }}
+            >
+              <span className="font-mono text-base w-8 text-center shrink-0 text-ink/70">{rankMark}</span>
+              <div
+                className="w-11 h-11 rounded-xl flex items-center justify-center text-xl shrink-0"
+                style={{ background: `${course.accent}1f` }}
+              >
+                {course.icon}
+              </div>
               <div className="flex-1 min-w-0">
-                <div className="flex items-baseline justify-between gap-2">
-                  <span className="font-medium text-ink text-sm truncate">{course.name}</span>
-                  <span className="font-mono text-sm text-ink shrink-0">{s.affinity}%</span>
-                </div>
-                <div className="flex items-center justify-between gap-2 mt-1">
-                  <div className="h-1.5 flex-1 rounded-full bg-paper-dim overflow-hidden">
-                    <div
-                      className="h-full rounded-full"
-                      style={{ width: `${s.affinity}%`, background: course.accent }}
-                    />
-                  </div>
-                  <span className={`font-mono text-[11px] uppercase tracking-wide shrink-0 ${statusTone[s.status]}`}>
-                    {statusLabel[s.status]}
-                  </span>
-                </div>
+                <span className="font-medium text-ink text-sm block truncate">{course.name}</span>
+                <span className={`font-mono text-[11px] uppercase tracking-wide ${statusTone[s.status]}`}>
+                  {statusLabel[s.status]}
+                </span>
               </div>
             </div>
           );
