@@ -1,5 +1,6 @@
 import { buildSynthesis } from "../engine/synthesis";
 import { ResultHero } from "../components/results/ResultHero";
+import { NoPrimaryNotice } from "../components/results/NoPrimaryNotice";
 import { RankingList } from "../components/results/RankingList";
 import { ComplementaryCard } from "../components/results/ComplementaryCard";
 import { FuturePaths } from "../components/results/FuturePaths";
@@ -20,25 +21,18 @@ interface ResultsPageProps {
 export function ResultsPage({ studentName, studentAge, guardianName, guardianPhone, answers, result, onRestart }: ResultsPageProps) {
   const synthesis = buildSynthesis(result.profile);
 
-  if (!result.primaryCourse) {
-    return (
-      <div className="text-center py-16">
-        <p className="text-slate">Não foi possível calcular uma recomendação. Tente novamente.</p>
-        <Button onClick={onRestart} className="mt-4">
-          Recomeçar
-        </Button>
-      </div>
-    );
-  }
-
   return (
     <div className="space-y-6">
-      <ResultHero
-        studentName={studentName}
-        primary={result.primaryCourse}
-        hybridCourses={result.hybridCourses}
-        synthesis={synthesis}
-      />
+      {result.primaryCourse ? (
+        <ResultHero
+          studentName={studentName}
+          primary={result.primaryCourse}
+          hybridCourses={result.hybridCourses}
+          synthesis={synthesis}
+        />
+      ) : (
+        <NoPrimaryNotice studentName={studentName} studentAge={studentAge} synthesis={synthesis} />
+      )}
 
       <DownloadResultButton
         studentName={studentName}
@@ -50,7 +44,7 @@ export function ResultsPage({ studentName, studentAge, guardianName, guardianPho
         result={result}
       />
 
-      <RankingList statuses={result.statusByCourse} />
+      <RankingList statuses={result.statusByCourse} excludeCourseId={result.primaryCourse?.courseId} />
 
       <FuturePaths courses={result.futurePaths} studentAge={studentAge} />
 

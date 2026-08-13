@@ -10,8 +10,8 @@ export function validateIntake(data: IntakeData): Partial<Record<keyof IntakeDat
 
   if (data.age === null || Number.isNaN(data.age)) {
     errors.age = "Informe a idade.";
-  } else if (!Number.isInteger(data.age) || data.age < 5 || data.age > 17) {
-    errors.age = "A idade deve estar entre 5 e 17 anos.";
+  } else if (!Number.isInteger(data.age) || data.age < 5) {
+    errors.age = "A idade mínima para preencher o formulário é 5 anos.";
   }
 
   return errors;

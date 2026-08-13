@@ -1,5 +1,5 @@
 import { courses } from "../../config/courses";
-import type { CourseStatus } from "../../types";
+import type { CourseId, CourseStatus } from "../../types";
 
 const statusLabel: Record<CourseStatus["status"], string> = {
   disponivel: "Disponível agora",
@@ -15,15 +15,27 @@ const statusTone: Record<CourseStatus["status"], string> = {
 
 const medals = ["🥇", "🥈", "🥉"];
 
-export function RankingList({ statuses }: { statuses: CourseStatus[] }) {
-  const sorted = [...statuses].sort((a, b) => b.affinity - a.affinity);
+interface RankingListProps {
+  statuses: CourseStatus[];
+  /** Curso já em destaque no card principal — não é repetido aqui embaixo. */
+  excludeCourseId?: CourseId | null;
+}
+
+export function RankingList({ statuses, excludeCourseId }: RankingListProps) {
+  const fullSorted = [...statuses].sort((a, b) => b.affinity - a.affinity);
+  const rankById = new Map(fullSorted.map((s, i) => [s.courseId, i]));
+  const sorted = fullSorted.filter((s) => s.courseId !== excludeCourseId);
+  if (sorted.length === 0) return null;
+  const heading = excludeCourseId ? "📋 Demais cursos recomendados" : "📊 Ordem de afinidade";
+
   return (
     <div>
-      <h3 className="font-display text-lg font-semibold text-ink mb-3">📊 Ordem de afinidade</h3>
+      <h3 className="font-display text-lg font-semibold text-ink mb-3">{heading}</h3>
       <div className="space-y-2.5">
-        {sorted.map((s, i) => {
+        {sorted.map((s) => {
           const course = courses[s.courseId];
-          const rankMark = medals[i] ?? `${i + 1}º`;
+          const overallIndex = rankById.get(s.courseId)!;
+          const rankMark = medals[overallIndex] ?? `${overallIndex + 1}º`;
           return (
             <div
               key={s.courseId}
@@ -38,10 +50,13 @@ export function RankingList({ statuses }: { statuses: CourseStatus[] }) {
                 {course.icon}
               </div>
               <div className="flex-1 min-w-0">
-                <span className="font-medium text-ink text-sm block truncate">{course.name}</span>
-                <span className={`font-mono text-[11px] uppercase tracking-wide ${statusTone[s.status]}`}>
-                  {statusLabel[s.status]}
-                </span>
+                <div className="flex items-baseline justify-between gap-2">
+                  <span className="font-medium text-ink text-sm truncate">{course.name}</span>
+                  <span className={`font-mono text-[11px] uppercase tracking-wide shrink-0 ${statusTone[s.status]}`}>
+                    {statusLabel[s.status]}
+                  </span>
+                </div>
+                <span className="text-xs text-slate truncate block mt-0.5">{course.tagline}</span>
               </div>
             </div>
           );

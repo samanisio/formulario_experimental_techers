@@ -20,8 +20,8 @@ export function recommend(answers: Answers, age: number): RecommendationResult {
 
   const primaryCourse = pickPrimaryCourse(eligibleRanking);
   const hybridCourses = findHybridCourses(eligibleRanking);
-  const futurePaths = findFuturePaths(pureRanking, eligibleIds);
-  const statusByCourse = buildStatusByCourse(pureRanking, eligibleIds);
+  const futurePaths = findFuturePaths(pureRanking, eligibleIds, age);
+  const statusByCourse = buildStatusByCourse(pureRanking, eligibleIds, age);
 
   const complementary = shouldCalculateInformatica(age)
     ? computeComplementary(profile)

@@ -1,3 +1,4 @@
+import { courses } from "../config/courses";
 import type { CourseAffinity, CourseId, CourseStatus } from "../types";
 
 const HYBRID_THRESHOLD = 12; // pontos percentuais de diferença para considerar perfil híbrido
@@ -14,19 +15,32 @@ export function findHybridCourses(eligibleRanking: CourseAffinity[]): CourseAffi
   return eligibleRanking.filter((c, i) => i > 0 && top - c.score <= HYBRID_THRESHOLD && c.score >= 55);
 }
 
-/** Cursos com boa afinidade que ainda não estão disponíveis para a idade atual. */
-export function findFuturePaths(pureRanking: CourseAffinity[], eligibleIds: Set<CourseId>): CourseAffinity[] {
-  return pureRanking.filter((c) => !eligibleIds.has(c.courseId) && c.score >= FUTURE_PATH_THRESHOLD);
+/**
+ * Um curso só é "trajetória futura" quando o aluno ainda NÃO chegou na idade
+ * mínima dele — nunca quando já passou da idade máxima. Sem essa distinção,
+ * uma pessoa mais velha (agora que o formulário não tem mais idade máxima de
+ * entrada) veria cursos como "próxima etapa" quando, na verdade, eles já
+ * ficaram para trás — o que não faz sentido nenhum.
+ */
+function isUpcoming(courseId: CourseId, age: number): boolean {
+  return age < courses[courseId].ageRange.min;
 }
 
-export function buildStatusByCourse(pureRanking: CourseAffinity[], eligibleIds: Set<CourseId>): CourseStatus[] {
-  return pureRanking.map((c) => ({
-    courseId: c.courseId,
-    affinity: c.score,
-    status: eligibleIds.has(c.courseId)
-      ? "disponivel"
-      : c.score >= FUTURE_PATH_THRESHOLD
-        ? "proxima-etapa"
-        : "fora-da-faixa",
-  }));
+/** Cursos com boa afinidade que o aluno ainda vai poder cursar ao completar a idade mínima. */
+export function findFuturePaths(pureRanking: CourseAffinity[], eligibleIds: Set<CourseId>, age: number): CourseAffinity[] {
+  return pureRanking.filter((c) => !eligibleIds.has(c.courseId) && isUpcoming(c.courseId, age) && c.score >= FUTURE_PATH_THRESHOLD);
+}
+
+export function buildStatusByCourse(pureRanking: CourseAffinity[], eligibleIds: Set<CourseId>, age: number): CourseStatus[] {
+  return pureRanking.map((c) => {
+    let status: CourseStatus["status"];
+    if (eligibleIds.has(c.courseId)) {
+      status = "disponivel";
+    } else if (isUpcoming(c.courseId, age) && c.score >= FUTURE_PATH_THRESHOLD) {
+      status = "proxima-etapa";
+    } else {
+      status = "fora-da-faixa";
+    }
+    return { courseId: c.courseId, affinity: c.score, status };
+  });
 }

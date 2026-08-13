@@ -7,9 +7,10 @@ import type { RecommendationResult } from "../types";
  * responsável salvar ou compartilhar. Nenhum dado sai do dispositivo do
  * usuário: a imagem é composta localmente e baixada diretamente.
  *
- * O layout espelha a versão web (ver src/components/results): cartão claro
- * com destaque na cor do curso, medalha para o 1º lugar e nenhuma
- * porcentagem — apenas a ORDEM de afinidade entre os cursos.
+ * Hierarquia visual: o curso #1 ganha um destaque grande (hero) com nome,
+ * descrição e ícone; os demais cursos aparecem logo abaixo em uma lista
+ * compacta com nome + descrição resumida — sem repetir o #1, que já foi
+ * apresentado no hero (ver README > "Apresentação visual dos cursos").
  */
 
 interface GenerateResultImageParams {
@@ -21,7 +22,7 @@ interface GenerateResultImageParams {
 
 const WIDTH = 1080;
 const SIDE_MARGIN = 48;
-const ROW_H = 96;
+const ROW_H = 116;
 const ROW_GAP = 16;
 const INK = "#14111c";
 const SLATE = "#6b6674";
@@ -97,6 +98,16 @@ function wrapText(ctx: CanvasRenderingContext2D, text: string, x: number, y: num
   return cursorY;
 }
 
+/** Trunca uma linha (com reticências) se ela não couber na largura disponível. */
+function truncateToWidth(ctx: CanvasRenderingContext2D, text: string, maxWidth: number): string {
+  if (ctx.measureText(text).width <= maxWidth) return text;
+  let t = text;
+  while (t.length > 1 && ctx.measureText(`${t}…`).width > maxWidth) {
+    t = t.slice(0, -1);
+  }
+  return `${t}…`;
+}
+
 function loadImage(src: string): Promise<HTMLImageElement | null> {
   return new Promise((resolve) => {
     const img = new Image();
@@ -128,16 +139,20 @@ export async function generateResultImage({ studentName, studentAge, synthesis, 
     }
   }
 
-  const sortedStatus = [...result.statusByCourse].sort((a, b) => b.affinity - a.affinity);
-  const hasComplementary = result.complementary.tier !== "baixa";
   const primary = result.primaryCourse;
+  const fullSorted = [...result.statusByCourse].sort((a, b) => b.affinity - a.affinity);
+  // A lista compacta nunca repete o curso já destacado no hero.
+  const otherStatus = fullSorted.filter((s) => s.courseId !== primary?.courseId);
+  const rankById = new Map(fullSorted.map((s, i) => [s.courseId, i]));
+  const hasComplementary = result.complementary.tier !== "baixa";
   const accent = primary ? courses[primary.courseId].accent : "#6d28d9";
 
-  const HERO_H = 600 + (result.hybridCourses.length > 0 ? 56 : 0);
-  const rankingH = sortedStatus.length * (ROW_H + ROW_GAP);
+  const HERO_H = primary ? 600 + (result.hybridCourses.length > 0 ? 56 : 0) : 320;
+  const rankingHeaderH = 90;
+  const rankingH = otherStatus.length * (ROW_H + ROW_GAP);
   const complementaryH = hasComplementary ? 168 : 0;
   const footerH = 90;
-  const height = SIDE_MARGIN + HERO_H + 64 + 90 + rankingH + complementaryH + footerH;
+  const height = SIDE_MARGIN + HERO_H + 64 + rankingHeaderH + rankingH + complementaryH + footerH;
 
   const canvas = document.createElement("canvas");
   canvas.width = WIDTH;
@@ -198,26 +213,19 @@ export async function generateResultImage({ studentName, studentAge, synthesis, 
 
     ctx.fillStyle = SLATE;
     ctx.font = "600 16px 'JetBrains Mono', monospace";
-    ctx.fillText(
-      result.hybridCourses.length > 0 ? "CURSOS PRINCIPAIS PARA VOCÊ" : "CURSO PRINCIPAL PARA VOCÊ",
-      heroX + 40,
-      labelY
-    );
+    ctx.fillText(result.hybridCourses.length > 0 ? "🥇 CURSOS MAIS INDICADOS" : "🥇 CURSO MAIS INDICADO", heroX + 40, labelY);
 
     const badgeY = labelY + 26;
     const badgeSize = 84;
     drawIconBadge(ctx, heroX + 40, badgeY, badgeSize, 40, course.icon, course.accent);
 
     ctx.fillStyle = INK;
-    ctx.font = "48px sans-serif";
-    ctx.fillText("🥇", heroX + 40 + badgeSize + 20, badgeY + 38);
-    const medalW = ctx.measureText("🥇").width;
     ctx.font = "700 40px 'Space Grotesk', sans-serif";
-    ctx.fillText(course.name, heroX + 40 + badgeSize + 20 + medalW + 12, badgeY + 38);
+    ctx.fillText(course.name, heroX + 40 + badgeSize + 20, badgeY + 38);
 
     ctx.fillStyle = accent;
     ctx.font = "600 18px 'Inter', sans-serif";
-    ctx.fillText("1º lugar no seu ranking de afinidade", heroX + 40 + badgeSize + 20, badgeY + 68);
+    ctx.fillText(course.tagline, heroX + 40 + badgeSize + 20, badgeY + 68);
 
     let pillsBottomY = badgeY + badgeSize;
     if (result.hybridCourses.length > 0) {
@@ -253,18 +261,37 @@ export async function generateResultImage({ studentName, studentAge, synthesis, 
     ctx.fillStyle = "rgba(20,17,28,0.68)";
     ctx.font = "400 20px 'Inter', sans-serif";
     wrapText(ctx, course.description, heroX + 40, dividerY + 38, heroW - 80, 27, 3);
+  } else {
+    const noticeY = Math.max(cursorY + 30, heroY + 260);
+    ctx.strokeStyle = LINE;
+    ctx.lineWidth = 1.5;
+    ctx.beginPath();
+    ctx.moveTo(heroX + 40, noticeY - 24);
+    ctx.lineTo(heroX + heroW - 40, noticeY - 24);
+    ctx.stroke();
+    ctx.fillStyle = "rgba(20,17,28,0.72)";
+    ctx.font = "400 21px 'Inter', sans-serif";
+    wrapText(
+      ctx,
+      `Os cursos principais da TECHERS são voltados a crianças e adolescentes de 5 a 17 anos. Para a idade informada (${studentAge} anos), nenhum desses cursos está disponível no momento.`,
+      heroX + 40,
+      noticeY,
+      heroW - 80,
+      29,
+      3
+    );
   }
 
-  // ranking
+  // demais cursos (nunca repete o #1 já mostrado no hero)
   let y = heroY + HERO_H + 64;
   ctx.fillStyle = INK;
   ctx.font = "700 32px 'Space Grotesk', sans-serif";
-  ctx.fillText("Ordem de afinidade", SIDE_MARGIN, y);
+  ctx.fillText(primary ? "📋 Demais cursos recomendados" : "📊 Ordem de afinidade", SIDE_MARGIN, y);
   y += 54;
 
-  for (let i = 0; i < sortedStatus.length; i++) {
-    const s = sortedStatus[i];
+  for (const s of otherStatus) {
     const course = courses[s.courseId];
+    const rankIndex = rankById.get(s.courseId)!;
 
     withCardShadow(ctx, () => {
       drawRoundedRect(ctx, SIDE_MARGIN, y, WIDTH - SIDE_MARGIN * 2, ROW_H, 20);
@@ -284,23 +311,31 @@ export async function generateResultImage({ studentName, studentAge, synthesis, 
     ctx.lineWidth = 1.5;
     ctx.stroke();
 
-    const rankMark = medals[i] ?? `${i + 1}º`;
+    const rankMark = medals[rankIndex] ?? `${rankIndex + 1}º`;
     ctx.fillStyle = SLATE;
-    ctx.font = medals[i] ? "30px sans-serif" : "600 24px 'JetBrains Mono', monospace";
+    ctx.font = medals[rankIndex] ? "28px sans-serif" : "600 22px 'JetBrains Mono', monospace";
     ctx.textBaseline = "middle";
     ctx.fillText(rankMark, SIDE_MARGIN + 34, y + ROW_H / 2, 56);
     ctx.textBaseline = "alphabetic";
 
     drawIconBadge(ctx, SIDE_MARGIN + 96, y + ROW_H / 2 - 26, 52, 26, course.icon, course.accent);
 
+    const textX = SIDE_MARGIN + 168;
+    const statusText = statusLabel[s.status].toUpperCase();
+
     ctx.fillStyle = INK;
-    ctx.font = "600 26px 'Inter', sans-serif";
-    ctx.fillText(course.name, SIDE_MARGIN + 168, y + ROW_H / 2 + 9);
+    ctx.font = "600 25px 'Inter', sans-serif";
+    const nameMaxWidth = WIDTH - SIDE_MARGIN - textX - 28;
+    ctx.fillText(truncateToWidth(ctx, course.name, nameMaxWidth), textX, y + ROW_H / 2 - 8);
+
+    ctx.fillStyle = SLATE;
+    ctx.font = "400 17px 'Inter', sans-serif";
+    ctx.fillText(truncateToWidth(ctx, course.tagline, WIDTH - SIDE_MARGIN - textX - 20), textX, y + ROW_H / 2 + 18);
 
     ctx.textAlign = "right";
     ctx.fillStyle = statusColor[s.status];
-    ctx.font = "600 16px 'JetBrains Mono', monospace";
-    ctx.fillText(statusLabel[s.status].toUpperCase(), WIDTH - SIDE_MARGIN - 28, y + ROW_H / 2 + 6);
+    ctx.font = "600 14px 'JetBrains Mono', monospace";
+    ctx.fillText(statusText, WIDTH - SIDE_MARGIN - 28, y + 30);
     ctx.textAlign = "left";
 
     y += ROW_H + ROW_GAP;
@@ -326,18 +361,21 @@ export async function generateResultImage({ studentName, studentAge, synthesis, 
 
     drawIconBadge(ctx, SIDE_MARGIN + 32, y + 30, 56, 28, imCourse.icon, imCourse.accent);
 
+    const tierText = result.complementary.tier === "alta" ? "Indicada" : "Indicação moderada";
     ctx.fillStyle = INK;
     ctx.font = "700 25px 'Space Grotesk', sans-serif";
-    ctx.fillText(`Curso complementar: ${imCourse.name}`, SIDE_MARGIN + 108, y + 52);
-
-    ctx.fillStyle = imCourse.accent;
-    ctx.font = "600 19px 'Inter', sans-serif";
-    const tierText = result.complementary.tier === "alta" ? "Alta indicação" : "Indicação moderada";
-    ctx.fillText(tierText, SIDE_MARGIN + 108, y + 82);
+    ctx.fillText(`${imCourse.name}: ${tierText}`, SIDE_MARGIN + 108, y + 52);
 
     ctx.fillStyle = SLATE;
     ctx.font = "400 18px 'Inter', sans-serif";
-    ctx.fillText("Pode complementar bem o desenvolvimento do aluno.", SIDE_MARGIN + 108, y + 112);
+    ctx.fillText(
+      "O diagnóstico identificou que o aluno pode se beneficiar deste curso complementar.",
+      SIDE_MARGIN + 108,
+      y + 82
+    );
+    ctx.fillStyle = imCourse.accent;
+    ctx.font = "500 16px 'Inter', sans-serif";
+    ctx.fillText(imCourse.tagline, SIDE_MARGIN + 108, y + 110);
 
     y += 140 + 36;
   }

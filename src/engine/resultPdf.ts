@@ -5,9 +5,9 @@ import type { Answers, RecommendationResult } from "../types";
 
 /**
  * Gera, inteiramente no navegador (jsPDF, sem backend), um relatório em PDF
- * com os dados do aluno, todas as perguntas e respostas do formulário (na
- * ordem em que foram feitas) e a ordem de cursos recomendados — a MESMA
- * ordem usada em src/engine/resultImage.ts, sem recalcular nada.
+ * na ordem: 1) dados do aluno, 2) cursos recomendados (mesma ordem usada em
+ * src/engine/resultImage.ts, sem recalcular nada) e 3) todas as perguntas e
+ * respostas do formulário, na ordem em que foram feitas.
  *
  * Identidade visual: logo oficial da TECHERS no cabeçalho, texto "TECHERS"
  * em preto (mesma decisão já aplicada no formulário e na imagem) e roxo
@@ -185,12 +185,86 @@ export async function generateResultPdf({
   y += cardH + 20;
   divider();
 
+  // ---- Cursos recomendados (antes das perguntas, conforme nova ordem) ------
+  heading("Cursos recomendados");
+  const medalText = ["1º", "2º", "3º"];
+  const sortedStatus = [...result.statusByCourse].sort((a, b) => b.affinity - a.affinity);
+  const wrapW = contentW - indent;
+
+  if (!result.primaryCourse) {
+    const noticeLines = paragraphLines(
+      `Os cursos principais da TECHERS são voltados a crianças e adolescentes de 5 a 17 anos. Para a idade informada (${studentAge} anos), nenhum desses cursos está disponível no momento.`,
+      10.5,
+      wrapW
+    );
+    ensureSpace(noticeLines.length * 14 + 10);
+    writeLines(noticeLines, 10.5, 14, { color: SLATE, x: margin + indent });
+    y += 10;
+  }
+
+  sortedStatus.forEach((s, i) => {
+    const course = courses[s.courseId];
+    const accent = hexToRgbTuple(course.accent);
+    const rank = medalText[i] ?? `${i + 1}º`;
+    const title = `${rank} — ${course.name}`;
+    const statusText = statusLabel[s.status] ?? "";
+    const taglineLines = paragraphLines(course.tagline, 10.5, wrapW);
+
+    const blockHeight = 18 + 14 + taglineLines.length * 13 + 14;
+    ensureSpace(Math.min(blockHeight, pageH - margin - footerReserve));
+
+    const blockStartY = y - 10;
+
+    doc.setFont("helvetica", "bold");
+    doc.setFontSize(12.5);
+    doc.setTextColor(...accent);
+    doc.text(title, margin + indent, y);
+    const titleW = doc.getTextWidth(title);
+    doc.setFont("helvetica", "normal");
+    doc.setFontSize(10);
+    doc.setTextColor(...SLATE);
+    doc.text(statusText, margin + indent + titleW + 12, y);
+    y += 16;
+
+    writeLines(taglineLines, 10.5, 13, { color: SLATE, x: margin + indent });
+
+    doc.setDrawColor(...accent);
+    doc.setLineWidth(2.5);
+    doc.line(margin, blockStartY, margin, y - 8);
+
+    y += 12;
+  });
+
+  if (result.complementary.tier !== "baixa") {
+    const imCourse = courses[result.complementary.courseId];
+    const accent = hexToRgbTuple(imCourse.accent);
+    const tierText = result.complementary.tier === "alta" ? "Indicada" : "Indicação moderada";
+    const noteLines = paragraphLines(
+      "O diagnóstico identificou que o aluno pode se beneficiar deste curso complementar.",
+      10,
+      wrapW
+    );
+    ensureSpace(50 + noteLines.length * 13);
+    const blockStartY = y - 10;
+    doc.setFont("helvetica", "bold");
+    doc.setFontSize(12);
+    doc.setTextColor(...INK);
+    doc.text(`Curso complementar: ${imCourse.name} — ${tierText}`, margin + indent, y);
+    y += 16;
+    writeLines(noteLines, 10, 13, { color: SLATE, x: margin + indent });
+    doc.setDrawColor(...accent);
+    doc.setLineWidth(2.5);
+    doc.line(margin, blockStartY, margin, y - 4);
+    y += 12;
+  }
+
+  divider();
+
   // ---- Respostas do formulário --------------------------------------------
   heading("Respostas do formulário");
   const questionLabelSize = 11.5;
   const answerLabelSize = 11;
   const lineHeight = 15;
-  const wrapW = contentW - indent;
 
   questions.forEach((question, index) => {
     const selectedId = answers[question.id];
@@ -232,67 +306,6 @@ export async function generateResultPdf({
 
     y += 16;
   });
-
-  divider();
-
-  // ---- Cursos recomendados -------------------------------------------------
-  heading("Cursos recomendados");
-  const medalText = ["1º", "2º", "3º"];
-  const sortedStatus = [...result.statusByCourse].sort((a, b) => b.affinity - a.affinity);
-
-  sortedStatus.forEach((s, i) => {
-    const course = courses[s.courseId];
-    const accent = hexToRgbTuple(course.accent);
-    const rank = medalText[i] ?? `${i + 1}º`;
-    const title = `${rank} — ${course.name}`;
-    const statusText = statusLabel[s.status] ?? "";
-    const taglineLines = paragraphLines(course.tagline, 10.5, wrapW);
-
-    const blockHeight = 18 + 14 + taglineLines.length * 13 + 14;
-    ensureSpace(Math.min(blockHeight, pageH - margin - footerReserve));
-
-    const blockStartY = y - 10;
-
-    doc.setFont("helvetica", "bold");
-    doc.setFontSize(12.5);
-    doc.setTextColor(...accent);
-    doc.text(title, margin + indent, y);
-    const titleW = doc.getTextWidth(title);
-    doc.setFont("helvetica", "normal");
-    doc.setFontSize(10);
-    doc.setTextColor(...SLATE);
-    doc.text(statusText, margin + indent + titleW + 12, y);
-    y += 16;
-
-    writeLines(taglineLines, 10.5, 13, { color: SLATE, x: margin + indent });
-
-    doc.setDrawColor(...accent);
-    doc.setLineWidth(2.5);
-    doc.line(margin, blockStartY, margin, y - 8);
-
-    y += 12;
-  });
-
-  if (result.complementary.tier !== "baixa") {
-    const imCourse = courses[result.complementary.courseId];
-    const accent = hexToRgbTuple(imCourse.accent);
-    const tierText = result.complementary.tier === "alta" ? "Alta indicação" : "Indicação moderada";
-    ensureSpace(40);
-    const blockStartY = y - 10;
-    doc.setFont("helvetica", "bold");
-    doc.setFontSize(12);
-    doc.setTextColor(...INK);
-    doc.text(`Curso complementar: ${imCourse.name}`, margin + indent, y);
-    y += 16;
-    doc.setFont("helvetica", "normal");
-    doc.setFontSize(10.5);
-    doc.setTextColor(...accent);
-    doc.text(tierText, margin + indent, y);
-    doc.setDrawColor(...accent);
-    doc.setLineWidth(2.5);
-    doc.line(margin, blockStartY, margin, y + 2);
-    y += 16;
-  }
 
   // ---- Rodapé em todas as páginas ------------------------------------------
   const pageCount = doc.getNumberOfPages();

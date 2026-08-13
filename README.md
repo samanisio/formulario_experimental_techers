@@ -94,30 +94,56 @@ indicação de complemento (alta / moderada / baixa, conforme faixas de pontuaç
 Na tela de resultado, o botão **"Baixar resultado"** dispara dois arquivos ao mesmo
 tempo, ambos gerados inteiramente no navegador (sem backend, sem upload de dados):
 
-1. **Imagem PNG** (`src/engine/resultImage.ts`, via Canvas 2D) — nome completo e
-   idade do aluno, síntese do perfil, curso principal com sua posição no ranking
-   (medalha 🥇 para o 1º lugar), a ordem de afinidade completa e o curso
-   complementar (quando houver). Arquivo: `cursos-recomendados-{nome-do-aluno}.png`.
+1. **Imagem PNG** (`src/engine/resultImage.ts`, via Canvas 2D) — hierarquia visual
+   em duas partes, para não repetir o curso #1: um cartão grande de destaque
+   ("🥇 Curso mais indicado") com nome, descrição resumida, descrição completa e
+   posição no ranking; logo abaixo, "📋 Demais cursos recomendados" traz o resto da
+   lista (a partir do 2º colocado) em formato compacto, com nome + descrição
+   resumida de cada curso. O curso complementar (Informática Moderna) só aparece
+   quando o diagnóstico realmente o indica — quando não é necessário, a seção
+   simplesmente não existe na imagem (nunca aparece como "não indicada"). Quando
+   nenhum curso principal está disponível para a idade informada, o cartão de
+   destaque vira um aviso explicando isso, e a lista mostra todos os cursos
+   calculados. Arquivo: `cursos-recomendados-{nome-do-aluno}.png`.
 2. **Relatório PDF** (`src/engine/resultPdf.ts`, via jsPDF) — logo oficial da
    TECHERS e roxo (`#6d28d9`) como cor de destaque em todo o relatório (barras de
    seção, cartão de dados do aluno, rótulos de pergunta/resposta, linha de cada
    bloco e rodapé); cada curso recomendado usa sua própria cor de destaque
-   (`courses.ts`), a mesma da imagem e da tela de resultado. Conteúdo: dados do
-   aluno (nome, idade e, se preenchidos, nome e telefone do responsável — campos
-   vazios são omitidos, não aparecem em branco), **todas as perguntas do
-   formulário com suas respectivas respostas**, na ordem em que foram feitas, e a
-   mesma ordem de cursos recomendados usada na imagem (nenhuma lógica de
-   recomendação é duplicada — o PDF lê o mesmo `RecommendationResult` já
-   calculado). Quebra de página automática: cada bloco de pergunta+resposta é
-   medido antes de ser desenhado e só é dividido entre páginas se for maior que
-   uma página inteira, evitando cortar uma pergunta de um lado e a resposta do
-   outro. Arquivo: `relatorio-{nome-do-aluno}.pdf`.
+   (`courses.ts`), a mesma da imagem e da tela de resultado. Ordem do conteúdo:
+   **1) dados do aluno** (nome, idade e, se preenchidos, nome e telefone do
+   responsável — campos vazios são omitidos, não aparecem em branco);
+   **2) cursos recomendados**, na mesma ordem usada na imagem, cada um com sua
+   descrição resumida, e o curso complementar quando indicado; **3) todas as
+   perguntas do formulário com suas respectivas respostas**, na ordem em que
+   foram feitas. Nenhuma lógica de recomendação é duplicada — o PDF lê o mesmo
+   `RecommendationResult` já calculado. Quebra de página automática: cada bloco de
+   pergunta+resposta (ou curso+descrição) é medido antes de ser desenhado e só é
+   dividido entre páginas se for maior que uma página inteira, evitando cortar uma
+   pergunta de um lado e a resposta do outro. Arquivo:
+   `relatorio-{nome-do-aluno}.pdf`.
 
 Os dois downloads partem de um único clique (`DownloadResultButton.tsx`): as
 imagens/PDF são geradas em paralelo (`Promise.all`) e disparadas com um pequeno
 intervalo entre si, para evitar que o navegador bloqueie o segundo arquivo como
 pop-up indesejado. O nome do aluno é sanitizado (sem acentos, espaços ou
 caracteres especiais) antes de virar nome de arquivo.
+
+## Descrição resumida de cada curso
+
+Cada curso já tem, em `src/config/courses.ts`, um campo `tagline` — uma frase curta
+e oficial (não inventada) que resume o curso. Esse mesmo campo é reaproveitado em
+três lugares: na lista compacta da imagem, na lista de "demais cursos" da tela de
+resultado e na lista de cursos do PDF — sempre a mesma fonte de dados, nunca
+duplicada ou reescrita.
+
+## Informática Moderna: só aparece quando faz sentido
+
+A indicação de Informática Moderna (`result.complementary`) é sempre calculada,
+mas só é **exibida** quando o diagnóstico aponta afinidade real — tier `"alta"` ou
+`"moderada"` (`src/config/scoring.ts` > `IM_TIER_THRESHOLDS`). Quando o tier é
+`"baixa"`, a seção inteira é omitida — na tela (`ComplementaryCard.tsx`), na
+imagem e no PDF — nunca aparece como "não indicada". Essa checagem
+(`tier !== "baixa"`) é a mesma nos três lugares.
 
 ## Exibição de resultado: ordem, não porcentagem
 
@@ -188,6 +214,22 @@ Edite `src/config/courses.ts`. Cada curso tem nome, ícone, textos, listas de
 Altere apenas o campo `ageRange` de cada curso em `src/config/courses.ts`. As regras
 de elegibilidade (`src/config/ageRules.ts`) leem esse campo automaticamente — não há
 números de idade duplicados em nenhum outro lugar do código.
+
+**O formulário não tem idade máxima própria** — qualquer pessoa com 5 anos ou mais
+pode preenchê-lo (`src/engine/validation.ts` só valida o mínimo). Quem preenche o
+formulário passa dos 17 anos (ou de qualquer `ageRange.max` dos cursos principais)
+simplesmente não vê nenhum curso como "disponível agora" — o `primaryCourse` do
+resultado vem `null`, e a interface, a imagem e o PDF mostram um aviso claro em vez
+de um curso (ver `NoPrimaryNotice.tsx`, e os blocos `if (!result.primaryCourse)` em
+`resultImage.ts`/`resultPdf.ts`). Informática Moderna, que não tem idade máxima
+(`ageRange.max: null`), continua sendo calculada e pode aparecer normalmente como
+complemento mesmo quando nenhum curso principal está disponível.
+
+Um curso só é classificado como **"próxima etapa"** quando o aluno ainda não chegou
+na idade mínima dele — nunca quando ele já passou da idade máxima
+(`src/engine/rankingEngine.ts` > `isUpcoming`). Isso evita, por exemplo, que uma
+pessoa de 40 anos veja "Programação: próxima etapa", o que sugeriria (errado) que o
+curso ficará disponível para ela algum dia.
 
 ## Como alterar identidade visual
 

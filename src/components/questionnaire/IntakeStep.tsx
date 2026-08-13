@@ -30,7 +30,6 @@ export function IntakeStep({ data, onChange, errors }: IntakeStepProps) {
             type="number"
             inputMode="numeric"
             min={5}
-            max={17}
             value={data.age ?? ""}
             onChange={(e) => onChange({ ...data, age: e.target.value === "" ? null : Number(e.target.value) })}
             placeholder="Ex: 10"

@@ -43,7 +43,7 @@ export type CourseId =
 
 export interface AgeRange {
   min: number;
-  max: number | null; // null = sem limite superior dentro da faixa 5-17
+  max: number | null; // null = sem limite superior de idade para este curso
 }
 
 export type CourseCategory = "principal" | "complementar";
