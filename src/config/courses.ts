@@ -108,7 +108,7 @@ export const courses: Record<CourseId, Course> = {
       "Blender para modelagem e animação 3D",
     ],
     skills: ["Criatividade e expressão artística", "Storytelling", "Planejamento de projetos", "Atenção aos detalhes", "Comunicação visual"],
-    ageRange: { min: 12, max: 17 },
+    ageRange: { min: 10, max: 17 },
     schedule: "1 vez por semana, 2 horas",
     duration: "Duração mínima de 2 anos",
     category: "principal",

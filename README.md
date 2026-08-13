@@ -89,15 +89,31 @@ pesos, e nunca compete com os cursos principais no ranking — ela aparece como
 indicação de complemento (alta / moderada / baixa, conforme faixas de pontuação em
 `src/config/scoring.ts`).
 
-## Imagem de resultado para download
+## Download do resultado: imagem + PDF em um único clique
 
-Na tela de resultado, o botão **"Baixar resultado em imagem"** gera uma imagem PNG
-(`src/engine/resultImage.ts`) inteiramente no navegador, via Canvas 2D — sem
-nenhum serviço externo ou upload de dados. A imagem inclui nome completo e idade do
-aluno, a síntese do perfil, o curso principal com sua posição no ranking (medalha 🥇
-para o 1º lugar), a ordem de afinidade completa e o curso complementar (quando
-houver). O nome do arquivo é gerado a partir do nome do aluno (ex.:
-`techers-perfil-maria-santos.png`).
+Na tela de resultado, o botão **"Baixar resultado"** dispara dois arquivos ao mesmo
+tempo, ambos gerados inteiramente no navegador (sem backend, sem upload de dados):
+
+1. **Imagem PNG** (`src/engine/resultImage.ts`, via Canvas 2D) — nome completo e
+   idade do aluno, síntese do perfil, curso principal com sua posição no ranking
+   (medalha 🥇 para o 1º lugar), a ordem de afinidade completa e o curso
+   complementar (quando houver). Arquivo: `cursos-recomendados-{nome-do-aluno}.png`.
+2. **Relatório PDF** (`src/engine/resultPdf.ts`, via jsPDF) — dados do aluno (nome,
+   idade e, se preenchidos, nome e telefone do responsável — campos vazios são
+   omitidos, não aparecem em branco), **todas as perguntas do formulário com suas
+   respectivas respostas**, na ordem em que foram feitas, e a mesma ordem de cursos
+   recomendados usada na imagem (nenhuma lógica de recomendação é duplicada — o PDF
+   lê o mesmo `RecommendationResult` já calculado). Quebra de página automática:
+   cada bloco de pergunta+resposta é medido antes de ser desenhado e só é dividido
+   entre páginas se for maior que uma página inteira, evitando cortar uma
+   pergunta de um lado e a resposta do outro. Arquivo:
+   `relatorio-{nome-do-aluno}.pdf`.
+
+Os dois downloads partem de um único clique (`DownloadResultButton.tsx`): as
+imagens/PDF são geradas em paralelo (`Promise.all`) e disparadas com um pequeno
+intervalo entre si, para evitar que o navegador bloqueie o segundo arquivo como
+pop-up indesejado. O nome do aluno é sanitizado (sem acentos, espaços ou
+caracteres especiais) antes de virar nome de arquivo.
 
 ## Exibição de resultado: ordem, não porcentagem
 
@@ -109,6 +125,19 @@ exata). Internamente, o motor de recomendação continua calculando a pontuaçã
 0–100 normalmente — ela só não é exibida — e continua sendo usada para decidir
 elegibilidade, perfil híbrido e trajetórias futuras (ver `src/types.ts` >
 `CourseAffinity.score`).
+
+## Validação do formulário
+
+Todas as perguntas de perfil são obrigatórias: o botão "Continuar" nunca avança
+sem uma resposta selecionada — ao tentar, uma mensagem ("Escolha uma opção para
+continuar.") aparece abaixo das alternativas em vez de simplesmente desabilitar o
+botão silenciosamente. A validação da tela de identificação (nome completo com
+duas palavras, idade entre 5 e 17) segue a mesma lógica (`src/engine/validation.ts`).
+Nome e telefone do responsável continuam opcionais, como já era.
+
+Todas as respostas — de identificação e de perfil — ficam em estado no componente
+`App`, nunca são limpas ao navegar entre telas: o aluno pode ir e voltar livremente
+pelo formulário sem perder nada do que já preencheu.
 
 ## Como alterar perguntas
 

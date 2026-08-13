@@ -5,16 +5,19 @@ import { ComplementaryCard } from "../components/results/ComplementaryCard";
 import { FuturePaths } from "../components/results/FuturePaths";
 import { DownloadResultButton } from "../components/results/DownloadResultButton";
 import { Button } from "../components/ui/Button";
-import type { RecommendationResult } from "../types";
+import type { Answers, RecommendationResult } from "../types";
 
 interface ResultsPageProps {
   studentName: string;
   studentAge: number;
+  guardianName: string;
+  guardianPhone: string;
+  answers: Answers;
   result: RecommendationResult;
   onRestart: () => void;
 }
 
-export function ResultsPage({ studentName, studentAge, result, onRestart }: ResultsPageProps) {
+export function ResultsPage({ studentName, studentAge, guardianName, guardianPhone, answers, result, onRestart }: ResultsPageProps) {
   const synthesis = buildSynthesis(result.profile);
 
   if (!result.primaryCourse) {
@@ -37,7 +40,15 @@ export function ResultsPage({ studentName, studentAge, result, onRestart }: Resu
         synthesis={synthesis}
       />
 
-      <DownloadResultButton studentName={studentName} studentAge={studentAge} synthesis={synthesis} result={result} />
+      <DownloadResultButton
+        studentName={studentName}
+        studentAge={studentAge}
+        guardianName={guardianName}
+        guardianPhone={guardianPhone}
+        answers={answers}
+        synthesis={synthesis}
+        result={result}
+      />
 
       <RankingList statuses={result.statusByCourse} />
 

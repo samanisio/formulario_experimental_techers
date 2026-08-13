@@ -23,6 +23,7 @@ function App() {
     guardianPhone: "",
   });
   const [errors, setErrors] = useState<Partial<Record<keyof IntakeData, string>>>({});
+  const [questionError, setQuestionError] = useState<string | null>(null);
 
   const currentQuestion = questions[questionIndex];
 
@@ -42,9 +43,18 @@ function App() {
 
   function handleSelectOption(optionId: string) {
     setAnswers((prev) => ({ ...prev, [currentQuestion.id]: optionId }));
+    setQuestionError(null);
   }
 
   function handleNext() {
+    // Pergunta obrigatória: não avança sem resposta válida, e explica o motivo
+    // em vez de apenas desabilitar o botão silenciosamente.
+    const answer = answers[currentQuestion.id];
+    if (answer === undefined || answer === null || answer === "") {
+      setQuestionError("Escolha uma opção para continuar.");
+      return;
+    }
+    setQuestionError(null);
     if (questionIndex < questions.length - 1) {
       setQuestionIndex((i) => i + 1);
     } else {
@@ -53,6 +63,7 @@ function App() {
   }
 
   function handleBack() {
+    setQuestionError(null);
     if (phase === "question" && questionIndex === 0) {
       setPhase("intake");
     } else {
@@ -66,9 +77,8 @@ function App() {
     setAnswers({});
     setIntake({ studentName: "", age: null, guardianName: "", guardianPhone: "" });
     setErrors({});
+    setQuestionError(null);
   }
-
-  const canContinue = phase === "question" ? Boolean(answers[currentQuestion.id]) : true;
 
   // Fluxo linear: 1 tela de identificação + N perguntas. A barra avança um
   // passo por tela, sem ficar parada no mesmo percentual por várias telas.
@@ -100,11 +110,22 @@ function App() {
         {phase === "intake" && <IntakeStep data={intake} onChange={setIntake} errors={errors} />}
 
         {phase === "question" && (
-          <QuestionStep question={currentQuestion} selected={answers[currentQuestion.id]} onSelect={handleSelectOption} />
+          <>
+            <QuestionStep question={currentQuestion} selected={answers[currentQuestion.id]} onSelect={handleSelectOption} />
+            {questionError && <p className="text-xs text-rose mt-4">{questionError}</p>}
+          </>
         )}
 
         {phase === "results" && result && intake.age !== null && (
-          <ResultsPage studentName={intake.studentName} studentAge={intake.age} result={result} onRestart={handleRestart} />
+          <ResultsPage
+            studentName={intake.studentName}
+            studentAge={intake.age}
+            guardianName={intake.guardianName}
+            guardianPhone={intake.guardianPhone}
+            answers={answers}
+            result={result}
+            onRestart={handleRestart}
+          />
         )}
 
         {phase !== "results" && (
@@ -112,7 +133,7 @@ function App() {
             <Button variant="ghost" onClick={handleBack}>
               Voltar
             </Button>
-            <Button onClick={phase === "intake" ? handleIntakeContinue : handleNext} disabled={!canContinue}>
+            <Button onClick={phase === "intake" ? handleIntakeContinue : handleNext}>
               {phase === "question" && questionIndex === questions.length - 1 ? "Ver meu resultado" : "Continuar"}
             </Button>
           </div>

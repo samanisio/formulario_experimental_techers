@@ -51,4 +51,11 @@ describe("Regras de idade — nenhuma violação para nenhuma idade testada", ()
       }
     });
   }
+
+  it("Animação Digital está disponível a partir dos 10 anos (não apenas calculada — elegível de fato)", () => {
+    expect(isEligible("animacao-digital", 10)).toBe(true);
+    expect(isEligible("animacao-digital", 9)).toBe(false);
+    const result10 = runRecommendationTest({}, 10);
+    expect(result10.eligibleRanking.some((c) => c.courseId === "animacao-digital")).toBe(true);
+  });
 });

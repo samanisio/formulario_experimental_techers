@@ -10,8 +10,8 @@ export function IntakeStep({ data, onChange, errors }: IntakeStepProps) {
   return (
     <div className="space-y-6">
       <div>
-        <h2 className="font-display text-2xl font-semibold text-ink">Vamos conhecer você</h2>
-        <p className="text-slate mt-1">Só o essencial para começar.</p>
+        <h2 className="font-display text-2xl font-semibold text-ink">Vamos conhecer você!</h2>
+        <p className="text-slate mt-1">Só o essencial para começar:</p>
       </div>
 
       <div className="space-y-4">

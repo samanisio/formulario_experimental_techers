@@ -9,7 +9,7 @@ import type { CourseId } from "../types";
  * | Programação            | 8–17  |
  * | Robótica               | 8–17  |
  * | Informática Moderna    | 8+    |
- * | Animação Digital       | 12–17 |
+ * | Animação Digital       | 10–17 |
  * | Design Gráfico         | 12–17 |
  *
  * Afinidade (o quanto o perfil combina com o curso) e elegibilidade (se o
