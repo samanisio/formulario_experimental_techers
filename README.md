@@ -98,16 +98,20 @@ tempo, ambos gerados inteiramente no navegador (sem backend, sem upload de dados
    idade do aluno, síntese do perfil, curso principal com sua posição no ranking
    (medalha 🥇 para o 1º lugar), a ordem de afinidade completa e o curso
    complementar (quando houver). Arquivo: `cursos-recomendados-{nome-do-aluno}.png`.
-2. **Relatório PDF** (`src/engine/resultPdf.ts`, via jsPDF) — dados do aluno (nome,
-   idade e, se preenchidos, nome e telefone do responsável — campos vazios são
-   omitidos, não aparecem em branco), **todas as perguntas do formulário com suas
-   respectivas respostas**, na ordem em que foram feitas, e a mesma ordem de cursos
-   recomendados usada na imagem (nenhuma lógica de recomendação é duplicada — o PDF
-   lê o mesmo `RecommendationResult` já calculado). Quebra de página automática:
-   cada bloco de pergunta+resposta é medido antes de ser desenhado e só é dividido
-   entre páginas se for maior que uma página inteira, evitando cortar uma
-   pergunta de um lado e a resposta do outro. Arquivo:
-   `relatorio-{nome-do-aluno}.pdf`.
+2. **Relatório PDF** (`src/engine/resultPdf.ts`, via jsPDF) — logo oficial da
+   TECHERS e roxo (`#6d28d9`) como cor de destaque em todo o relatório (barras de
+   seção, cartão de dados do aluno, rótulos de pergunta/resposta, linha de cada
+   bloco e rodapé); cada curso recomendado usa sua própria cor de destaque
+   (`courses.ts`), a mesma da imagem e da tela de resultado. Conteúdo: dados do
+   aluno (nome, idade e, se preenchidos, nome e telefone do responsável — campos
+   vazios são omitidos, não aparecem em branco), **todas as perguntas do
+   formulário com suas respectivas respostas**, na ordem em que foram feitas, e a
+   mesma ordem de cursos recomendados usada na imagem (nenhuma lógica de
+   recomendação é duplicada — o PDF lê o mesmo `RecommendationResult` já
+   calculado). Quebra de página automática: cada bloco de pergunta+resposta é
+   medido antes de ser desenhado e só é dividido entre páginas se for maior que
+   uma página inteira, evitando cortar uma pergunta de um lado e a resposta do
+   outro. Arquivo: `relatorio-{nome-do-aluno}.pdf`.
 
 Os dois downloads partem de um único clique (`DownloadResultButton.tsx`): as
 imagens/PDF são geradas em paralelo (`Promise.all`) e disparadas com um pequeno
