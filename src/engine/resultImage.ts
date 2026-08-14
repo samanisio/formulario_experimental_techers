@@ -22,7 +22,7 @@ interface GenerateResultImageParams {
 
 const WIDTH = 1080;
 const SIDE_MARGIN = 48;
-const ROW_H = 116;
+const ROW_H = 172;
 const ROW_GAP = 16;
 const INK = "#14111c";
 const SLATE = "#6b6674";
@@ -70,29 +70,36 @@ function withCardShadow(ctx: CanvasRenderingContext2D, draw: () => void) {
   ctx.restore();
 }
 
-/** Quebra texto em várias linhas respeitando uma largura máxima; retorna o Y final. */
+/** Quebra texto em várias linhas respeitando uma largura máxima; corta com
+ * reticências se ultrapassar maxLines, em vez de estourar a largura. Retorna o Y final. */
 function wrapText(ctx: CanvasRenderingContext2D, text: string, x: number, y: number, maxWidth: number, lineHeight: number, maxLines = 4): number {
   const words = text.split(" ");
+  const allLines: string[] = [];
   let line = "";
-  let cursorY = y;
-  let lines = 0;
   for (const word of words) {
     const testLine = line ? `${line} ${word}` : word;
     if (ctx.measureText(testLine).width > maxWidth && line) {
-      ctx.fillText(line, x, cursorY);
+      allLines.push(line);
       line = word;
-      cursorY += lineHeight;
-      lines += 1;
-      if (lines >= maxLines - 1) {
-        line = words.slice(words.indexOf(word)).join(" ");
-        break;
-      }
     } else {
       line = testLine;
     }
   }
-  if (line) {
-    ctx.fillText(line, x, cursorY);
+  if (line) allLines.push(line);
+
+  const truncatedNeeded = allLines.length > maxLines;
+  const shown = truncatedNeeded ? allLines.slice(0, maxLines) : allLines;
+  if (truncatedNeeded) {
+    let lastLine = shown[maxLines - 1];
+    while (lastLine.length > 0 && ctx.measureText(`${lastLine}…`).width > maxWidth) {
+      lastLine = lastLine.slice(0, -1);
+    }
+    shown[maxLines - 1] = `${lastLine.trimEnd()}…`;
+  }
+
+  let cursorY = y;
+  for (const l of shown) {
+    ctx.fillText(l, x, cursorY);
     cursorY += lineHeight;
   }
   return cursorY;
@@ -150,7 +157,7 @@ export async function generateResultImage({ studentName, studentAge, synthesis, 
   const HERO_H = primary ? 600 + (result.hybridCourses.length > 0 ? 56 : 0) : 320;
   const rankingHeaderH = 90;
   const rankingH = otherStatus.length * (ROW_H + ROW_GAP);
-  const complementaryH = hasComplementary ? 168 : 0;
+  const complementaryH = hasComplementary ? 176 + 36 : 0;
   const footerH = 90;
   const height = SIDE_MARGIN + HERO_H + 64 + rankingHeaderH + rankingH + complementaryH + footerH;
 
@@ -273,7 +280,7 @@ export async function generateResultImage({ studentName, studentAge, synthesis, 
     ctx.font = "400 21px 'Inter', sans-serif";
     wrapText(
       ctx,
-      `Os cursos principais da TECHERS são voltados a crianças e adolescentes de 5 a 17 anos. Para a idade informada (${studentAge} anos), nenhum desses cursos está disponível no momento.`,
+      `Cada curso da TECHERS tem uma idade mínima própria. Para a idade informada (${studentAge} anos), nenhum desses cursos está disponível no momento.`,
       heroX + 40,
       noticeY,
       heroW - 80,
@@ -315,10 +322,10 @@ export async function generateResultImage({ studentName, studentAge, synthesis, 
     ctx.fillStyle = SLATE;
     ctx.font = medals[rankIndex] ? "28px sans-serif" : "600 22px 'JetBrains Mono', monospace";
     ctx.textBaseline = "middle";
-    ctx.fillText(rankMark, SIDE_MARGIN + 34, y + ROW_H / 2, 56);
+    ctx.fillText(rankMark, SIDE_MARGIN + 34, y + 46, 56);
     ctx.textBaseline = "alphabetic";
 
-    drawIconBadge(ctx, SIDE_MARGIN + 96, y + ROW_H / 2 - 26, 52, 26, course.icon, course.accent);
+    drawIconBadge(ctx, SIDE_MARGIN + 96, y + 20, 52, 26, course.icon, course.accent);
 
     const textX = SIDE_MARGIN + 168;
     const statusText = statusLabel[s.status].toUpperCase();
@@ -326,11 +333,11 @@ export async function generateResultImage({ studentName, studentAge, synthesis, 
     ctx.fillStyle = INK;
     ctx.font = "600 25px 'Inter', sans-serif";
     const nameMaxWidth = WIDTH - SIDE_MARGIN - textX - 28;
-    ctx.fillText(truncateToWidth(ctx, course.name, nameMaxWidth), textX, y + ROW_H / 2 - 8);
+    ctx.fillText(truncateToWidth(ctx, course.name, nameMaxWidth), textX, y + 40);
 
     ctx.fillStyle = SLATE;
-    ctx.font = "400 17px 'Inter', sans-serif";
-    ctx.fillText(truncateToWidth(ctx, course.tagline, WIDTH - SIDE_MARGIN - textX - 20), textX, y + ROW_H / 2 + 18);
+    ctx.font = "400 16.5px 'Inter', sans-serif";
+    wrapText(ctx, course.description, textX, y + 70, WIDTH - SIDE_MARGIN - textX - 20, 22, 3);
 
     ctx.textAlign = "right";
     ctx.fillStyle = statusColor[s.status];
@@ -343,18 +350,19 @@ export async function generateResultImage({ studentName, studentAge, synthesis, 
 
   if (hasComplementary) {
     const imCourse = courses[result.complementary.courseId];
+    const boxH = 176;
     withCardShadow(ctx, () => {
-      drawRoundedRect(ctx, SIDE_MARGIN, y, WIDTH - SIDE_MARGIN * 2, 140, 24);
+      drawRoundedRect(ctx, SIDE_MARGIN, y, WIDTH - SIDE_MARGIN * 2, boxH, 24);
       ctx.fillStyle = "#ffffff";
       ctx.fill();
     });
     ctx.save();
-    drawRoundedRect(ctx, SIDE_MARGIN, y, WIDTH - SIDE_MARGIN * 2, 140, 24);
+    drawRoundedRect(ctx, SIDE_MARGIN, y, WIDTH - SIDE_MARGIN * 2, boxH, 24);
     ctx.clip();
     ctx.fillStyle = imCourse.accent;
-    ctx.fillRect(SIDE_MARGIN, y, 6, 140);
+    ctx.fillRect(SIDE_MARGIN, y, 6, boxH);
     ctx.restore();
-    drawRoundedRect(ctx, SIDE_MARGIN, y, WIDTH - SIDE_MARGIN * 2, 140, 24);
+    drawRoundedRect(ctx, SIDE_MARGIN, y, WIDTH - SIDE_MARGIN * 2, boxH, 24);
     ctx.strokeStyle = LINE;
     ctx.lineWidth = 1.5;
     ctx.stroke();
@@ -364,20 +372,13 @@ export async function generateResultImage({ studentName, studentAge, synthesis, 
     const tierText = result.complementary.tier === "alta" ? "Indicada" : "Indicação moderada";
     ctx.fillStyle = INK;
     ctx.font = "700 25px 'Space Grotesk', sans-serif";
-    ctx.fillText(`${imCourse.name}: ${tierText}`, SIDE_MARGIN + 108, y + 52);
+    ctx.fillText(`${imCourse.name}: ${tierText}`, SIDE_MARGIN + 108, y + 46);
 
     ctx.fillStyle = SLATE;
-    ctx.font = "400 18px 'Inter', sans-serif";
-    ctx.fillText(
-      "O diagnóstico identificou que o aluno pode se beneficiar deste curso complementar.",
-      SIDE_MARGIN + 108,
-      y + 82
-    );
-    ctx.fillStyle = imCourse.accent;
-    ctx.font = "500 16px 'Inter', sans-serif";
-    ctx.fillText(imCourse.tagline, SIDE_MARGIN + 108, y + 110);
+    ctx.font = "400 16.5px 'Inter', sans-serif";
+    wrapText(ctx, imCourse.description, SIDE_MARGIN + 108, y + 76, WIDTH - SIDE_MARGIN - (SIDE_MARGIN + 108) - 32, 22, 3);
 
-    y += 140 + 36;
+    y += boxH + 36;
   }
 
   ctx.textAlign = "center";

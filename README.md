@@ -216,20 +216,28 @@ de elegibilidade (`src/config/ageRules.ts`) leem esse campo automaticamente — 
 números de idade duplicados em nenhum outro lugar do código.
 
 **O formulário não tem idade máxima própria** — qualquer pessoa com 5 anos ou mais
-pode preenchê-lo (`src/engine/validation.ts` só valida o mínimo). Quem preenche o
-formulário passa dos 17 anos (ou de qualquer `ageRange.max` dos cursos principais)
-simplesmente não vê nenhum curso como "disponível agora" — o `primaryCourse` do
-resultado vem `null`, e a interface, a imagem e o PDF mostram um aviso claro em vez
-de um curso (ver `NoPrimaryNotice.tsx`, e os blocos `if (!result.primaryCourse)` em
-`resultImage.ts`/`resultPdf.ts`). Informática Moderna, que não tem idade máxima
-(`ageRange.max: null`), continua sendo calculada e pode aparecer normalmente como
-complemento mesmo quando nenhum curso principal está disponível.
+pode preenchê-lo (`src/engine/validation.ts` só valida o mínimo). Além disso, **só o
+Maker tem idade máxima** (`ageRange: { min: 5, max: 7 }`, fixo — é um curso desenhado
+especificamente para essa faixa e não faz sentido fora dela). Todos os outros cursos
+principais (Programação, Robótica, Animação Digital, Design Gráfico) têm apenas
+idade mínima, sem teto (`ageRange.max: null`), assim como Informática Moderna já
+tinha. Na prática, isso significa que **qualquer pessoa a partir da idade mínima de
+algum curso sempre recebe uma indicação** — um adulto de 30, 40 ou 90 anos recebe
+normalmente o curso mais adequado ao seu perfil (Programação/Robótica a partir dos
+8 anos, Animação Digital a partir dos 10, Design Gráfico a partir dos 12), do mesmo
+jeito que um adolescente.
+
+O componente `NoPrimaryNotice.tsx` (e os blocos `if (!result.primaryCourse)` em
+`resultImage.ts`/`resultPdf.ts`) continuam existindo como salvaguarda — não deveriam
+mais ser acionados para nenhuma idade a partir dos 5 anos com as faixas atuais, mas
+ficam prontos caso `courses.ts` volte a ter algum curso só com faixa fechada.
 
 Um curso só é classificado como **"próxima etapa"** quando o aluno ainda não chegou
-na idade mínima dele — nunca quando ele já passou da idade máxima
-(`src/engine/rankingEngine.ts` > `isUpcoming`). Isso evita, por exemplo, que uma
-pessoa de 40 anos veja "Programação: próxima etapa", o que sugeriria (errado) que o
-curso ficará disponível para ela algum dia.
+na idade mínima dele (`src/engine/rankingEngine.ts` > `isUpcoming`) — por exemplo,
+uma criança de 9 anos vendo Design Gráfico (12+) como "próxima etapa". Como só o
+Maker tem idade máxima agora, "ultrapassar o teto" só é possível para o Maker; para
+os demais cursos, uma vez atingida a idade mínima, a pessoa permanece elegível para
+sempre.
 
 ## Como alterar identidade visual
 

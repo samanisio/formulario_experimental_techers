@@ -43,6 +43,14 @@ function hexToRgbTuple(hex: string): [number, number, number] {
   return [(value >> 16) & 255, (value >> 8) & 255, value & 255];
 }
 
+/** Limita um parágrafo já quebrado em linhas a no máximo `maxLines`, com reticências. */
+function limitLines(lines: string[], maxLines: number): string[] {
+  if (lines.length <= maxLines) return lines;
+  const limited = lines.slice(0, maxLines);
+  limited[maxLines - 1] = `${limited[maxLines - 1].trimEnd()}…`;
+  return limited;
+}
+
 /** Carrega a logo e devolve um data URL PNG — mesma técnica usada em resultImage.ts. */
 function loadImageAsDataUrl(src: string): Promise<string | null> {
   return new Promise((resolve) => {
@@ -193,7 +201,7 @@ export async function generateResultPdf({
 
   if (!result.primaryCourse) {
     const noticeLines = paragraphLines(
-      `Os cursos principais da TECHERS são voltados a crianças e adolescentes de 5 a 17 anos. Para a idade informada (${studentAge} anos), nenhum desses cursos está disponível no momento.`,
+      `Cada curso da TECHERS tem uma idade mínima própria. Para a idade informada (${studentAge} anos), nenhum desses cursos está disponível no momento.`,
       10.5,
       wrapW
     );
@@ -208,9 +216,9 @@ export async function generateResultPdf({
     const rank = medalText[i] ?? `${i + 1}º`;
     const title = `${rank} — ${course.name}`;
     const statusText = statusLabel[s.status] ?? "";
-    const taglineLines = paragraphLines(course.tagline, 10.5, wrapW);
+    const descLines = limitLines(paragraphLines(course.description, 10.5, wrapW), 3);
 
-    const blockHeight = 18 + 14 + taglineLines.length * 13 + 14;
+    const blockHeight = 18 + 14 + descLines.length * 13 + 14;
     ensureSpace(Math.min(blockHeight, pageH - margin - footerReserve));
 
     const blockStartY = y - 10;
@@ -226,7 +234,7 @@ export async function generateResultPdf({
     doc.text(statusText, margin + indent + titleW + 12, y);
     y += 16;
 
-    writeLines(taglineLines, 10.5, 13, { color: SLATE, x: margin + indent });
+    writeLines(descLines, 10.5, 13, { color: SLATE, x: margin + indent });
 
     doc.setDrawColor(...accent);
     doc.setLineWidth(2.5);
@@ -239,11 +247,7 @@ export async function generateResultPdf({
     const imCourse = courses[result.complementary.courseId];
     const accent = hexToRgbTuple(imCourse.accent);
     const tierText = result.complementary.tier === "alta" ? "Indicada" : "Indicação moderada";
-    const noteLines = paragraphLines(
-      "O diagnóstico identificou que o aluno pode se beneficiar deste curso complementar.",
-      10,
-      wrapW
-    );
+    const noteLines = limitLines(paragraphLines(imCourse.description, 10, wrapW), 3);
     ensureSpace(50 + noteLines.length * 13);
     const blockStartY = y - 10;
     doc.setFont("helvetica", "bold");

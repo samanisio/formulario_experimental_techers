@@ -60,36 +60,34 @@ describe("Regras de idade — nenhuma violação para nenhuma idade testada", ()
   });
 });
 
-describe("Idade sem limite máximo no formulário (só os cursos têm limite próprio)", () => {
-  it("adulto (30 anos): nenhum curso principal elegível, mas Informática Moderna continua calculável", () => {
+describe("Idade sem limite máximo nos cursos (exceto Maker, que é fixo 5–7)", () => {
+  it("adulto (30 anos): recebe o curso mais adequado como principal, como qualquer outra idade", () => {
     const result = runRecommendationTest({}, 30);
-    expect(result.primaryCourse).toBeNull();
-    expect(result.eligibleRanking.length).toBe(0);
-    // Informática Moderna não tem idade máxima — segue calculada normalmente.
+    expect(result.primaryCourse).not.toBeNull();
+    // Sem teto de idade, todos os cursos principais (min. 8, 8, 10, 12) ficam elegíveis aos 30 anos.
+    expect(result.eligibleRanking.length).toBe(4);
     expect(result.complementary.score).toBeGreaterThanOrEqual(0);
   });
 
-  it("idade avançada (65 anos): mesma coisa, sem quebrar o motor de recomendação", () => {
+  it("idade avançada (65 anos): continua recebendo uma recomendação normalmente, sem quebrar o motor", () => {
     const result = runRecommendationTest({}, 65);
-    expect(result.primaryCourse).toBeNull();
-    expect(result.eligibleRanking.length).toBe(0);
-    expect(result.hybridCourses).toEqual([]);
+    expect(result.primaryCourse).not.toBeNull();
+    expect(result.eligibleRanking.length).toBe(4);
   });
 
-  it("pessoa mais velha nunca vê 'próxima etapa' — cursos com idade máxima ultrapassada são 'fora da faixa etária'", () => {
-    const result = runRecommendationTest({}, 40);
-    for (const s of result.statusByCourse) {
-      if (s.status === "proxima-etapa") {
-        // só pode ser 'próxima etapa' se a pessoa ainda não tiver chegado na idade mínima
-        const course = courseList.find((c) => c.id === s.courseId)!;
-        expect(40).toBeLessThan(course.ageRange.min);
-      }
-    }
-    // Para 40 anos, todo curso principal (idade mínima bem abaixo de 40) deve
-    // estar "fora da faixa etária", nunca "próxima etapa".
+  it("Maker é o único curso com teto de idade — continua elegível só dos 5 aos 7 anos", () => {
+    expect(isEligible("maker", 5)).toBe(true);
+    expect(isEligible("maker", 7)).toBe(true);
+    expect(isEligible("maker", 8)).toBe(false);
+    expect(isEligible("maker", 30)).toBe(false);
+    expect(isEligible("maker", 65)).toBe(false);
+  });
+
+  it("os quatro cursos principais (sem teto) ficam 'disponível agora' para uma pessoa de 50 anos", () => {
+    const result = runRecommendationTest({}, 50);
     const mainCourseStatuses = result.statusByCourse.filter((s) => s.courseId !== "informatica-moderna");
     for (const s of mainCourseStatuses) {
-      expect(s.status).toBe("fora-da-faixa");
+      expect(s.status).toBe("disponivel");
     }
   });
 

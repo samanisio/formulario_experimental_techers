@@ -3,14 +3,17 @@ import type { CourseId } from "../types";
 
 /**
  * Regras de idade — absolutas, conforme especificação da TECHERS.
+ * Maker é o único curso com faixa fechada (idade mínima E máxima); todos os
+ * demais têm apenas idade mínima, sem teto — um adulto pode ser elegível
+ * normalmente, desde que atenda ao mínimo do curso.
  * | Curso                | Idade |
  * |-----------------------|-------|
- * | Maker                 | 5–7   |
- * | Programação            | 8–17  |
- * | Robótica               | 8–17  |
+ * | Maker                 | 5–7 (fixo) |
+ * | Programação            | 8+    |
+ * | Robótica               | 8+    |
  * | Informática Moderna    | 8+    |
- * | Animação Digital       | 10–17 |
- * | Design Gráfico         | 12–17 |
+ * | Animação Digital       | 10+   |
+ * | Design Gráfico         | 12+   |
  *
  * Afinidade (o quanto o perfil combina com o curso) e elegibilidade (se o
  * aluno pode começar agora) são sempre calculadas separadamente.

@@ -6,11 +6,13 @@ interface NoPrimaryNoticeProps {
 
 /**
  * Estado exibido quando nenhum curso principal está disponível para a idade
- * informada — hoje só acontece quando a pessoa já passou da idade máxima de
- * todos os cursos principais (o formulário não tem mais idade máxima própria,
- * apenas cada curso mantém a sua). Não é um erro: o diagnóstico segue válido,
- * e Informática Moderna (sem idade máxima) pode continuar sendo indicada
- * separadamente — ver ComplementaryCard, renderizado logo depois deste aviso.
+ * informada. Com as regras atuais (só o Maker tem teto de idade — os demais
+ * cursos têm apenas mínimo, sem limite superior) isso não deveria mais
+ * acontecer para nenhuma idade a partir dos 5 anos — mas o componente fica
+ * como salvaguarda, caso as faixas etárias de courses.ts mudem no futuro.
+ * Não é tratado como erro: o diagnóstico segue válido, e Informática Moderna
+ * (sem idade máxima) pode continuar sendo indicada separadamente — ver
+ * ComplementaryCard, renderizado logo depois deste aviso.
  */
 export function NoPrimaryNotice({ studentName, studentAge, synthesis }: NoPrimaryNoticeProps) {
   const firstName = studentName.trim().split(/\s+/)[0] || "Você";
@@ -21,7 +23,7 @@ export function NoPrimaryNotice({ studentName, studentAge, synthesis }: NoPrimar
       <p className="text-ink/75 text-sm leading-relaxed mb-5">{synthesis}</p>
       <div className="border-t border-line pt-5">
         <p className="text-ink/80 text-sm leading-relaxed">
-          Os cursos principais da TECHERS são voltados a crianças e adolescentes de 5 a 17 anos. Para a idade
+          Cada curso da TECHERS tem uma idade mínima própria. Para a idade
           informada ({studentAge} anos), nenhum desses cursos está disponível no momento.
         </p>
       </div>
