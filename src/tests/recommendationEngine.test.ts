@@ -3,6 +3,9 @@ import { runRecommendationTest } from "./simulator";
 import { sampleProfiles } from "./sampleProfiles";
 import { isEligible } from "../config/ageRules";
 import { courseList } from "../config/courses";
+import { questions } from "../config/questions";
+import { courseWeights } from "../config/scoring";
+import type { Answers } from "../types";
 
 describe("Motor de recomendação — perfis fictícios", () => {
   for (const profile of sampleProfiles) {
@@ -32,6 +35,31 @@ describe("Motor de recomendação — perfis fictícios", () => {
     const top2 = result.eligibleRanking.slice(0, 2).map((c) => c.courseId);
     expect(top2).toEqual(expect.arrayContaining(["programacao", "robotica"]));
     expect(result.hybridCourses.length).toBeGreaterThan(0);
+  });
+
+  it("Perfil 5 — chega a Design Gráfico sem nenhuma alternativa de desenho", () => {
+    const p5 = sampleProfiles.find((p) => p.label.startsWith("Perfil 5"))!;
+    for (const question of questions) {
+      const selectedId = p5.answers[question.id];
+      const option = question.options.find((o) => o.id === selectedId)!;
+      expect(option.label.toLowerCase()).not.toContain("desenh");
+    }
+    const result = runRecommendationTest(p5.answers, p5.age);
+    expect(result.primaryCourse?.courseId).toBe("design-grafico");
+  });
+});
+
+describe("Design Gráfico não depende de desenho", () => {
+  it("a matriz de pesos de design-grafico não usa a dimensão 'drawing'", () => {
+    expect(courseWeights["design-grafico"].drawing ?? 0).toBe(0);
+  });
+
+  it("um perfil forte em edição de mídia/curadoria/comunicação, mas zero em desenho, ainda chega a Design Gráfico", () => {
+    // Perfil sintético: só preenche as dimensões novas de Design (sem `drawing`).
+    const answers: Answers = { q4: "d", q5: "d", q7: "d", q9: "d" };
+    const result = runRecommendationTest(answers, 15);
+    expect(result.pureRanking[0]?.courseId).toBe("design-grafico");
+    expect(result.profile.drawing).toBe(0);
   });
 });
 

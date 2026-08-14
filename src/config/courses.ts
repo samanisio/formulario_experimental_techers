@@ -121,7 +121,7 @@ export const courses: Record<CourseId, Course> = {
     icon: "🎨",
     tagline: "Transformando criatividade em comunicação visual",
     description:
-      "O curso ideal para quem gosta de criar, comunicar ideias e desenvolver projetos visuais que chamam a atenção, formando um portfólio real ao longo do curso.",
+      "O curso ideal para quem gosta de criar, comunicar ideias e desenvolver projetos visuais que chamam a atenção, formando um portfólio real ao longo do curso. Não é preciso saber desenhar: a criação acontece com fotos, tipografia, cores e composição.",
     whatYouBuild: ["Artes para redes sociais", "Identidades visuais e logotipos", "Banners, cartazes e materiais gráficos", "Apresentações profissionais", "Portfólio pessoal"],
     whatYouLearn: [
       "Fundamentos e princípios do design gráfico",

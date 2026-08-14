@@ -44,7 +44,7 @@ navegador durante a sessão. Nenhum tracker, analytics ou pixel é utilizado.
 ```
 Resposta (alternativa escolhida)
    ↓
-Dimensões de perfil (StudentProfile, ~27 dimensões internas)
+Dimensões de perfil (StudentProfile, 30 dimensões internas)
    ↓
 Pesos da resposta (cada alternativa soma pontos a 1+ dimensões)
    ↓
@@ -73,21 +73,62 @@ muito alinhados cheguem a 90%+ de afinidade, como nos exemplos da especificaçã
 **Nota sobre distintividade por dimensão (`src/engine/scoringEngine.ts`):**
 dimensões que aparecem em quase todos os cursos (como "criatividade" ou
 "raciocínio lógico") diferenciam pouco um curso do outro. Dimensões raras
-(como "eletrônica", quase exclusiva de Robótica, ou "estética visual", quase
-exclusiva de Design Gráfico) são muito mais informativas para decidir *entre*
-cursos parecidos. Por isso, antes de pontuar, cada peso da matriz de cursos é
+(como "eletrônica", quase exclusiva de Robótica, ou "curadoria visual", exclusiva
+de Design Gráfico) são muito mais informativas para decidir *entre* cursos
+parecidos. Por isso, antes de pontuar, cada peso da matriz de cursos é
 multiplicado por um fator de distintividade — uma versão simplificada de
 IDF ("inverse document frequency", técnica clássica de sistemas de busca e
 recomendação): dimensões usadas por todos os 6 cursos ficam com fator ~1
-(neutro); dimensões usadas por 1 único curso chegam a ~2.3x. Isso resolve o
-problema de Programação e Robótica (ou Animação Digital e Design Gráfico)
-ficarem com pontuações quase idênticas para perfis mistos — o fator amplifica
-justamente o que torna cada curso único.
+(neutro); dimensões usadas por 1 único curso chegam a ~2.3x.
 
 Informática Moderna é sempre calculada **separadamente**, com sua própria matriz de
 pesos, e nunca compete com os cursos principais no ranking — ela aparece como
 indicação de complemento (alta / moderada / baixa, conforme faixas de pontuação em
 `src/config/scoring.ts`).
+
+## Equilíbrio entre cursos e cobertura de dimensões
+
+Cada curso na matriz de pesos (`src/config/scoring.ts`) só recebe peso nas
+dimensões que são realmente dele — nenhum curso tem peso nas dimensões
+"assinatura" de outro (ex.: Programação não tem `robotics`/`design`; Robótica não
+tem `programming`/`drawing`). Pesos residuais espalhados por todos os cursos foram
+a causa de um desequilíbrio real: Programação chegava a ser o curso "principal" em
+~42% de 30 mil perfis de resposta aleatória simulados (o esperado, com 4 cursos
+principais elegíveis, é próximo de 25% cada). Depois da separação estrita, a
+simulação ficou em ~28/25/24/23% entre Programação/Animação Digital/Robótica/
+Design Gráfico.
+
+Dois scripts (fora do app, não afetam o build) ajudam a manter esse equilíbrio ao
+editar perguntas ou pesos:
+
+```bash
+npx tsx scripts/balance-check.ts      # simula 30 mil perfis aleatórios e mede
+                                       # a frequência de cada curso como "principal"
+npx tsx scripts/dimension-coverage.ts # mede em quantas alternativas cada dimensão
+                                       # aparece, pra achar dimensões sub-representadas
+```
+
+Rode os dois depois de qualquer alteração em `questions.ts` ou `scoring.ts`.
+
+## Design Gráfico não depende de desenho
+
+É um mito comum (mas falso) que fazer Design exige saber desenhar. O curso de
+verdade (`whatYouLearn`/`skills` em `src/config/courses.ts`) é sobre composição,
+tipografia, cor, edição de fotos e comunicação visual — por isso a dimensão
+`drawing` tem peso **zero** na matriz de Design Gráfico, e nenhuma alternativa do
+formulário associada a Design menciona desenhar. Em vez disso, o perfil usa três
+dimensões próprias que não aparecem em nenhum outro curso:
+
+- `visualCuration` — observar e analisar peças visuais prontas (capas, pôsteres,
+  imagens promocionais);
+- `mediaEditing` — editar fotos, criar thumbnails, montar colagens e artes a
+  partir de fotos e recortes;
+- `communication` — comunicar ideias (já era uma habilidade oficial do curso,
+  listada em `courses.ts` > design-grafico > skills).
+
+A descrição oficial do curso (mostrada no resultado, na imagem e no PDF) também
+deixa isso explícito: *"Não é preciso saber desenhar: a criação acontece com
+fotos, tipografia, cores e composição."*
 
 ## Download do resultado: imagem + PDF em um único clique
 
@@ -188,10 +229,19 @@ parecia travada por várias telas seguidas.
 ## Como alterar pesos
 
 Edite `src/config/scoring.ts` (`courseWeights`). Escala sugerida: 0 (não relacionado)
-a 5 (relação muito alta). Após qualquer alteração, rode `npm test` — os 8 perfis
-fictícios de `src/tests/sampleProfiles.ts` ajudam a identificar se um curso passou a
-ser favorecido ou prejudicado indevidamente. Para testar perfis manualmente, use
-`runRecommendationTest(answers, age)` em `src/tests/simulator.ts`.
+a 5 (relação muito alta). **Não dê peso a um curso em dimensões que são assinatura de
+outro curso** — isso foi a causa raiz de um desequilíbrio real (ver "Equilíbrio entre
+cursos" acima). Depois de qualquer alteração, rode, nessa ordem:
+
+```bash
+npx tsx scripts/balance-check.ts   # confirma que nenhum curso ficou super/sub-representado
+npm test                            # os 8 perfis fictícios de src/tests/sampleProfiles.ts
+                                     # ajudam a identificar se um curso passou a ser
+                                     # favorecido ou prejudicado indevidamente
+```
+
+Para testar perfis manualmente, use `runRecommendationTest(answers, age)` em
+`src/tests/simulator.ts`.
 
 ### Ajustes de pesos em relação à especificação original
 
@@ -290,6 +340,10 @@ src/
 ├── pages/            # composição das telas (resultado)
 ├── tests/            # perfis fictícios + testes automatizados (Vitest)
 └── types.ts          # todos os tipos centrais do domínio
+
+scripts/              # diagnóstico (fora do app, não entram no build)
+├── balance-check.ts       # simula perfis aleatórios, mede equilíbrio entre cursos
+└── dimension-coverage.ts  # mede cobertura de cada dimensão nas perguntas
 ```
 
 A lógica de recomendação (`engine/`) não importa nada de `components/` — pode ser

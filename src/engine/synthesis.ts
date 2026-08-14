@@ -33,6 +33,9 @@ const traitPhrases: Partial<Record<ProfileDimension, string>> = {
   attentionToDetail: "atenção aos detalhes",
   imagination: "imaginação",
   fineMotorSkills: "coordenação e montagem",
+  visualCuration: "observar e analisar boas artes visuais",
+  mediaEditing: "editar fotos e criar artes a partir delas",
+  communication: "comunicar ideias",
 };
 
 export function buildSynthesis(profile: StudentProfile): string {

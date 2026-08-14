@@ -8,7 +8,7 @@ const emptyProfile = (): StudentProfile => {
     "storytelling", "design", "aestheticSense", "digitalAutonomy", "digitalProductivity",
     "digitalTools", "artificialIntelligence", "games", "projects", "problemSolving",
     "teamwork", "practicalActivities", "challenges", "attentionToDetail", "imagination",
-    "fineMotorSkills",
+    "fineMotorSkills", "visualCuration", "mediaEditing", "communication",
   ];
   return Object.fromEntries(dims.map((d) => [d, 0])) as StudentProfile;
 };

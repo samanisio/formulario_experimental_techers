@@ -1,7 +1,14 @@
 // Tipos centrais do motor de recomendação da TECHERS.
 // Mantidos separados da interface para facilitar manutenção (ver README).
 
-/** Dimensões internas de perfil. Nunca são mostradas diretamente ao usuário. */
+/** Dimensões internas de perfil. Nunca são mostradas diretamente ao usuário.
+ * As três últimas (visualCuration, mediaEditing, communication) existem para
+ * capturar o perfil de Design Gráfico que NÃO passa por desenho: apreciar/
+ * analisar peças visuais prontas (capas, pôsteres), editar fotos/criar artes
+ * a partir delas, e comunicar ideias — as três já constam oficialmente em
+ * `courses.ts` (whatYouLearn: "Edição e tratamento de imagens"; skills:
+ * "Comunicação e resolução de problemas") mas não tinham dimensão própria
+ * até então, ficando misturadas com `drawing`/`visualCreativity`. */
 export type ProfileDimension =
   | "logicalReasoning"
   | "programming"
@@ -29,7 +36,10 @@ export type ProfileDimension =
   | "challenges"
   | "attentionToDetail"
   | "imagination"
-  | "fineMotorSkills";
+  | "fineMotorSkills"
+  | "visualCuration"
+  | "mediaEditing"
+  | "communication";
 
 export type StudentProfile = Record<ProfileDimension, number>;
 
