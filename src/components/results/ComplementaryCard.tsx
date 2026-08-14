@@ -1,19 +1,10 @@
 import { courses } from "../../config/courses";
 import type { ComplementaryResult } from "../../types";
 
-const tierCopy: Record<ComplementaryResult["tier"], { label: string; text: string }> = {
-  alta: {
-    label: "Alta indicação",
-    text: "Informática Moderna pode ser um excelente complemento para o aluno.",
-  },
-  moderada: {
-    label: "Indicação moderada",
-    text: "Informática Moderna pode complementar bem o desenvolvimento do aluno.",
-  },
-  baixa: {
-    label: "Baixa indicação",
-    text: "Informática Moderna não aparece como prioridade neste momento, mas pode ser revisitada futuramente.",
-  },
+const tierCopy: Record<ComplementaryResult["tier"], { label: string }> = {
+  alta: { label: "Alta indicação" },
+  moderada: { label: "Indicação moderada" },
+  baixa: { label: "Baixa indicação" },
 };
 
 export function ComplementaryCard({ result }: { result: ComplementaryResult }) {
@@ -41,7 +32,7 @@ export function ComplementaryCard({ result }: { result: ComplementaryResult }) {
           </span>
         </div>
       </div>
-      <p className="text-sm text-ink/80 mt-3 leading-relaxed">{copy.text}</p>
+      <p className="text-sm text-ink/80 mt-3 leading-relaxed">{course.description}</p>
     </div>
   );
 }

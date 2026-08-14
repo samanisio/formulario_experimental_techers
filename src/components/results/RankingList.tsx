@@ -56,7 +56,7 @@ export function RankingList({ statuses, excludeCourseId }: RankingListProps) {
                     {statusLabel[s.status]}
                   </span>
                 </div>
-                <span className="text-xs text-slate truncate block mt-0.5">{course.tagline}</span>
+                <p className="text-xs text-slate leading-relaxed mt-1 line-clamp-3">{course.description}</p>
               </div>
             </div>
           );
