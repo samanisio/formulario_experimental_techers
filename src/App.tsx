@@ -1,5 +1,6 @@
 import { useMemo, useState } from "react";
 import { questions } from "./config/questions";
+import { shuffleQuestionOptions } from "./engine/shuffle";
 import { validateIntake } from "./engine/validation";
 import { recommend } from "./engine/recommendationEngine";
 import { ProgressBar } from "./components/ui/ProgressBar";
@@ -16,6 +17,11 @@ function App() {
   const [phase, setPhase] = useState<Phase>("intake");
   const [questionIndex, setQuestionIndex] = useState(0);
   const [answers, setAnswers] = useState<Answers>({});
+  // Ordem de exibição das alternativas, embaralhada por sessão (ver
+  // src/engine/shuffle.ts). O motor de recomendação nunca usa este array —
+  // ele sempre lê `questions` (a ordem original) por `id`, então embaralhar
+  // aqui só afeta o que aparece na tela, nunca a pontuação.
+  const [displayQuestions, setDisplayQuestions] = useState(() => shuffleQuestionOptions(questions));
   const [intake, setIntake] = useState<IntakeData>({
     studentName: "",
     age: null,
@@ -25,7 +31,7 @@ function App() {
   const [errors, setErrors] = useState<Partial<Record<keyof IntakeData, string>>>({});
   const [questionError, setQuestionError] = useState<string | null>(null);
 
-  const currentQuestion = questions[questionIndex];
+  const currentQuestion = displayQuestions[questionIndex];
 
   const result = useMemo(() => {
     if (phase !== "results" || intake.age === null) return null;
@@ -55,7 +61,7 @@ function App() {
       return;
     }
     setQuestionError(null);
-    if (questionIndex < questions.length - 1) {
+    if (questionIndex < displayQuestions.length - 1) {
       setQuestionIndex((i) => i + 1);
     } else {
       setPhase("results");
@@ -78,13 +84,15 @@ function App() {
     setIntake({ studentName: "", age: null, guardianName: "", guardianPhone: "" });
     setErrors({});
     setQuestionError(null);
+    // Novo embaralhamento a cada tentativa.
+    setDisplayQuestions(shuffleQuestionOptions(questions));
   }
 
   // Fluxo linear: 1 tela de identificação + N perguntas. A barra avança um
   // passo por tela, sem ficar parada no mesmo percentual por várias telas.
-  const totalScreens = questions.length + 1;
+  const totalScreens = displayQuestions.length + 1;
   const currentScreen = phase === "intake" ? 1 : 1 + questionIndex + 1;
-  const progressLabel = phase === "intake" ? "Sobre você" : `Pergunta ${questionIndex + 1} de ${questions.length}`;
+  const progressLabel = phase === "intake" ? "Sobre você" : `Pergunta ${questionIndex + 1} de ${displayQuestions.length}`;
 
   return (
     <div className="min-h-screen bg-paper relative">
@@ -134,7 +142,7 @@ function App() {
               Voltar
             </Button>
             <Button onClick={phase === "intake" ? handleIntakeContinue : handleNext}>
-              {phase === "question" && questionIndex === questions.length - 1 ? "Ver meu resultado" : "Continuar"}
+              {phase === "question" && questionIndex === displayQuestions.length - 1 ? "Ver meu resultado" : "Continuar"}
             </Button>
           </div>
         )}

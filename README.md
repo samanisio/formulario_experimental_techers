@@ -226,6 +226,21 @@ cada tela avança exatamente 1/(N+1) do total. Isso evita o problema da versão
 anterior, em que várias perguntas ficavam agrupadas sob a mesma "etapa" e a barra
 parecia travada por várias telas seguidas.
 
+## Ordem das alternativas embaralhada
+
+Em todas as 10 perguntas, a alternativa `id` corresponde sempre à mesma direção —
+`a` = Programação, `b` = Robótica, `c` = Animação Digital, `d` = Design Gráfico,
+`e` = Informática Moderna. Isso é só a identidade *interna* de cada alternativa
+(usada pelo motor de recomendação para saber quais dimensões somar). A ORDEM em
+que elas aparecem na tela é embaralhada a cada nova tentativa
+(`src/engine/shuffle.ts`, aplicado em `App.tsx` com `useState(() =>
+shuffleQuestionOptions(questions))` e regerado a cada "Refazer o diagnóstico") —
+assim, quem responde no automático (sempre a primeira opção) não cai sempre no
+mesmo curso. O embaralhamento é só de exibição: `profileEngine.ts` sempre lê
+`questions` (a ordem original de `src/config/questions.ts`) e busca a alternativa
+escolhida pelo `id`, então a pontuação nunca depende da posição em que uma
+alternativa aparece na tela, só do seu conteúdo.
+
 ## Como alterar pesos
 
 Edite `src/config/scoring.ts` (`courseWeights`). Escala sugerida: 0 (não relacionado)
