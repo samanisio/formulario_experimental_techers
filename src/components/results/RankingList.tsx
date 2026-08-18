@@ -51,12 +51,12 @@ export function RankingList({ statuses, excludeCourseId }: RankingListProps) {
               </div>
               <div className="flex-1 min-w-0">
                 <div className="flex items-baseline justify-between gap-2">
-                  <span className="font-medium text-ink text-sm truncate">{course.name}</span>
+                  <span className="font-medium text-ink text-sm">{course.name}</span>
                   <span className={`font-mono text-[11px] uppercase tracking-wide shrink-0 ${statusTone[s.status]}`}>
                     {statusLabel[s.status]}
                   </span>
                 </div>
-                <p className="text-xs text-slate leading-relaxed mt-1 line-clamp-3">{course.description}</p>
+                <p className="text-xs text-slate leading-relaxed mt-1">{course.description}</p>
               </div>
             </div>
           );
