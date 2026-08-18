@@ -29,6 +29,13 @@ import type { ProfileQuestion } from "../types";
 // comunicação de ideias (communication), que é como o curso funciona de
 // verdade (ver courses.ts > design-grafico).
 //
+// Importante sobre as alternativas de Animação Digital: evite concentrar
+// tudo em "história/roteiro" — o curso também é sobre movimento, dublagem,
+// stop-motion, direção/ritmo de cena e repetição/aperfeiçoamento (ver
+// courses.ts > animacao-digital > whatYouBuild/whatYouLearn/skills). Das 10
+// perguntas, só a pergunta 10 menciona história explicitamente; as outras
+// cobrem facetas diferentes do curso para não ficar repetitivo.
+//
 // Para adicionar, remover ou reformular perguntas, edite somente este
 // arquivo — o motor de recomendação e a barra de progresso se adaptam
 // automaticamente ao número de perguntas.
@@ -40,7 +47,7 @@ export const questions: ProfileQuestion[] = [
     options: [
       { id: "a", label: "Programar uma demonstração ou joguinho para mostrar no computador", weights: { programming: 5, logicalReasoning: 3, technology: 3, games: 2 } },
       { id: "b", label: "Montar a estrutura física do estande, com peças e mecanismos que se mexem", weights: { robotics: 5, construction: 4, electronics: 3, practicalActivities: 3 } },
-      { id: "c", label: "Desenhar os personagens e inventar uma historinha para contar no estande", weights: { drawing: 4, storytelling: 4, animation: 3, imagination: 3 } },
+      { id: "c", label: "Desenhar os personagens e fazer um vídeo curtinho deles se mexendo", weights: { drawing: 4, animation: 5, imagination: 3 } },
       { id: "d", label: "Criar o cartaz e a identidade visual do estande, com cores e um logotipo", weights: { design: 5, visualCreativity: 4, aestheticSense: 3, communication: 2 } },
       { id: "e", label: "Organizar a apresentação: o que entra em cada slide e a ordem das falas", weights: { digitalProductivity: 5, digitalAutonomy: 3, projects: 2 } },
     ],
@@ -51,7 +58,7 @@ export const questions: ProfileQuestion[] = [
     options: [
       { id: "a", label: "Não usaria a caixa — preferiria montar ou programar algo no computador", weights: { programming: 4, technology: 4, logicalReasoning: 2 } },
       { id: "b", label: "Uma máquina ou robô que realmente se mexesse", weights: { robotics: 5, construction: 4, electronics: 3, practicalActivities: 3 } },
-      { id: "c", label: "Um boneco ou cenário para contar uma história", weights: { storytelling: 4, drawing: 3, animation: 3, imagination: 4 } },
+      { id: "c", label: "Um bonequinho articulado, pra fotografar em poses diferentes e fazer ele parecer se mexer", weights: { animation: 5, attentionToDetail: 3, imagination: 2 } },
       { id: "d", label: "Uma decoração ou escultura bem caprichada e bonita", weights: { design: 4, aestheticSense: 4, visualCreativity: 3, creativity: 3 } },
       { id: "e", label: "Organizaria tudo por tipo e cor antes de decidir o que fazer", weights: { digitalProductivity: 3, attentionToDetail: 4, digitalAutonomy: 2 } },
     ],
@@ -62,7 +69,7 @@ export const questions: ProfileQuestion[] = [
     options: [
       { id: "a", label: "Criar um programa ou app para organizar as pistas encontradas", weights: { programming: 4, logicalReasoning: 4, technology: 3 } },
       { id: "b", label: "Montar armadilhas ou mecanismos para testar as pistas na prática", weights: { robotics: 3, construction: 4, problemSolving: 4, practicalActivities: 3 } },
-      { id: "c", label: "Imaginar a história completa do mistério e o motivo por trás dele", weights: { storytelling: 5, imagination: 4, drawing: 2 } },
+      { id: "c", label: "Dar uma voz e um jeito de falar diferente para cada suspeito, quase dublando eles", weights: { animation: 4, imagination: 3, attentionToDetail: 2 } },
       { id: "d", label: "Criar cartazes de \u201Cprocurado\u201D bem caprichados para cada suspeito", weights: { design: 4, visualCreativity: 4, aestheticSense: 3 } },
       { id: "e", label: "Organizar todas as provas numa lista bem estruturada", weights: { digitalProductivity: 4, attentionToDetail: 4, logicalReasoning: 2 } },
     ],
@@ -73,7 +80,7 @@ export const questions: ProfileQuestion[] = [
     options: [
       { id: "a", label: "Programar meu primeiro jogo ou site", weights: { programming: 5, technology: 3, logicalReasoning: 2 } },
       { id: "b", label: "Controlar um robozinho ou brinquedo conectado a ele", weights: { robotics: 4, technology: 4, electronics: 2 } },
-      { id: "c", label: "Criar uma animação ou vídeo com personagens", weights: { animation: 4, drawing: 3, storytelling: 3 } },
+      { id: "c", label: "Fazer um personagem se mexer e ganhar vida numa animação", weights: { animation: 5, drawing: 3, imagination: 2 } },
       { id: "d", label: "Editar fotos, criar thumbnails ou artes usando fotos e textos", weights: { mediaEditing: 5, visualCreativity: 3, design: 2 } },
       { id: "e", label: "Organizar meus trabalhos da escola e aprender truques para estudar melhor", weights: { digitalProductivity: 5, digitalAutonomy: 3, artificialIntelligence: 2 } },
     ],
@@ -84,7 +91,7 @@ export const questions: ProfileQuestion[] = [
     options: [
       { id: "a", label: "Programar como ele se move e reage dentro de um jogo", weights: { programming: 4, logicalReasoning: 3, games: 3 } },
       { id: "b", label: "Criar um boneco ou protótipo físico dele, tipo um brinquedo", weights: { construction: 4, robotics: 2, practicalActivities: 3, fineMotorSkills: 2 } },
-      { id: "c", label: "Desenhar como ele é e inventar a história dele", weights: { drawing: 5, storytelling: 4, imagination: 3 } },
+      { id: "c", label: "Desenhar como ele é e pensar no jeito dele se mexer e reagir às coisas", weights: { drawing: 5, animation: 3, imagination: 2 } },
       { id: "d", label: "Montar uma colagem dele com fotos e recortes, criando um cenário ao redor", weights: { mediaEditing: 4, visualCreativity: 3, imagination: 2, design: 2 } },
       { id: "e", label: "Escrever tudo sobre ele de um jeito bem organizado, numa ficha", weights: { digitalProductivity: 3, attentionToDetail: 3, digitalAutonomy: 2 } },
     ],
@@ -95,7 +102,7 @@ export const questions: ProfileQuestion[] = [
     options: [
       { id: "a", label: "Criar um passo a passo bem lógico, quase como as instruções de um programa", weights: { logicalReasoning: 4, programming: 2, problemSolving: 3 } },
       { id: "b", label: "Montar uma maquete ou modelo físico para representar o trabalho", weights: { construction: 3, robotics: 2, practicalActivities: 4, fineMotorSkills: 2 } },
-      { id: "c", label: "Contar o conteúdo do trabalho como se fosse uma historinha", weights: { storytelling: 4, imagination: 3, creativity: 2 } },
+      { id: "c", label: "Transformar o trabalho num vídeo animado curtinho, com cenas se movendo", weights: { animation: 4, imagination: 2, creativity: 2 } },
       { id: "d", label: "Caprichar no visual: cores, capa bonita, tudo esteticamente organizado", weights: { design: 4, aestheticSense: 4, visualCreativity: 3 } },
       { id: "e", label: "Usar uma lista de tarefas e ir organizando cada etapa, uma de cada vez", weights: { digitalProductivity: 5, digitalAutonomy: 3, attentionToDetail: 2 } },
     ],
@@ -106,7 +113,7 @@ export const questions: ProfileQuestion[] = [
     options: [
       { id: "a", label: "Programar um efeito especial ou uma parte interativa do vídeo", weights: { programming: 3, technology: 4, logicalReasoning: 2 } },
       { id: "b", label: "Cuidar da parte técnica: câmera, luzes e os equipamentos", weights: { electronics: 3, technology: 4, practicalActivities: 3, robotics: 1 } },
-      { id: "c", label: "Escrever o roteiro da história e dirigir as cenas", weights: { storytelling: 5, imagination: 3, attentionToDetail: 2 } },
+      { id: "c", label: "Decidir a ordem das cenas e o ritmo de cada corte, tipo um diretor", weights: { animation: 3, attentionToDetail: 3, imagination: 2 } },
       { id: "d", label: "Editar o vídeo e criar a capa (thumbnail) para chamar atenção", weights: { mediaEditing: 5, design: 2, communication: 2 } },
       { id: "e", label: "Organizar o cronograma de gravação e publicar tudo direitinho", weights: { digitalProductivity: 4, digitalAutonomy: 3, digitalTools: 3 } },
     ],
@@ -128,7 +135,7 @@ export const questions: ProfileQuestion[] = [
     options: [
       { id: "a", label: "Segue um raciocínio lógico, passo a passo, testando e corrigindo erros", weights: { logicalReasoning: 5, programming: 3, problemSolving: 3 } },
       { id: "b", label: "Coloca a mão na massa: monta, testa e desmonta até entender", weights: { practicalActivities: 5, construction: 3, robotics: 2, problemSolving: 2 } },
-      { id: "c", label: "Vê um exemplo contado como uma história, com começo, meio e fim", weights: { storytelling: 4, imagination: 4, drawing: 2 } },
+      { id: "c", label: "Repete e ajusta várias vezes até o movimento ou o resultado ficar do jeito certo", weights: { attentionToDetail: 4, animation: 3, imagination: 2 } },
       { id: "d", label: "Observa um exemplo bem feito visualmente — tipo a capa de um livro ou um pôster bem bolado — e se inspira nele", weights: { visualCuration: 5, aestheticSense: 3, design: 1 } },
       { id: "e", label: "Segue um passo a passo escrito, organizado em etapas bem claras", weights: { digitalProductivity: 4, attentionToDetail: 3, digitalAutonomy: 2 } },
     ],
